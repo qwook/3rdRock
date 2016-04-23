@@ -1,5 +1,7 @@
 var http = require('http');
 var Twitter = require('twitter');
+fs = require('fs');
+
 
 //grabbing Data from EONET
 var options = {
@@ -7,7 +9,26 @@ var options = {
   path: '/api/v2.1/events'
 };
 
-var nasaData = {};
+// var nasaData = {
+//   events: [
+//     {
+//       title: 'HUGE FIRE',
+//       coordinates: [
+//           longitude: 13431412,
+//           latitude: 234233,
+//       ],
+//       link: www.website.com,
+//       tweets: [
+//         {
+//             username:
+//             profilePicture:
+//             date:
+//             tweet:
+//         }
+//       ]
+//     }
+//   ]
+// };
 
 callback = function(response) {
   var data;
@@ -22,7 +43,33 @@ callback = function(response) {
   response.on('end', function () {
     data = JSON.parse(str)
     data.events.forEach(function(event) {
-        getTweets(event)
+      var eventCategory;
+      var eventURL;
+      function getEventCategory() {
+        if (typeof event.categories[0] != "undefined") {
+          eventCategory = event.categories[0].title;
+        }
+        else {
+          eventCategory = 'none'
+        }
+      }
+      function getEventURL() {
+        if (typeof event.sources[0] != "undefined") {
+              eventURL = event.sources[0].url;
+            }
+        else {
+          eventURL = 'none'
+        }
+      }
+      getEventURL();
+      getEventCategory();
+      var newEvent = {
+        title: event.title,
+        category: eventCategory,
+        link: eventURL,
+        geometries: event.geometries 
+      }
+      console.log(newEvent)
     })
   });
 }
@@ -39,9 +86,9 @@ var client = new Twitter({
  
 function getTweets(event) {
   client.get('search/tweets', {q: event.title}, function(error, tweets, response){
-    tweets.statuses.forEach(function(tweet) {
-      console.log(tweet)
-    })
+      tweets.statuses.forEach(function(specificTweet) {
+        nasaData
+      })
   });
 }
 
