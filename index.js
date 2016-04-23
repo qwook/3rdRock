@@ -1,4 +1,5 @@
 var http = require('http');
+var Promise = require("bluebird");
 var Twitter = require('twitter');
 fs = require('fs');
 
@@ -9,26 +10,9 @@ var options = {
   path: '/api/v2.1/events'
 };
 
-// var nasaData = {
-//   events: [
-//     {
-//       title: 'HUGE FIRE',
-//       coordinates: [
-//           longitude: 13431412,
-//           latitude: 234233,
-//       ],
-//       link: www.website.com,
-//       tweets: [
-//         {
-//             username:
-//             profilePicture:
-//             date:
-//             tweet:
-//         }
-//       ]
-//     }
-//   ]
-// };
+var nasaData = {
+  events: []
+};
 
 callback = function(response) {
   var data;
@@ -41,6 +25,8 @@ callback = function(response) {
 
 
   response.on('end', function () {
+    // array of promises
+    var promises = [];
     data = JSON.parse(str)
     data.events.forEach(function(event) {
       var eventCategory;
@@ -70,8 +56,16 @@ callback = function(response) {
         geometries: event.geometries, 
         twitter: []
       }
-      getTweets(newEvent)
+      nasaData.events.push(newEvent);
+      // push in promises
+      promises.push(getTweets(newEvent))
     })
+
+    // map promisses
+    Promise.all(promises).then(function() {
+      console.log(JSON.stringify(nasaData))
+    });
+    // then send
   });
 }
 
@@ -86,7 +80,8 @@ var client = new Twitter({
 });
  
 function getTweets(event) {
-  client.get('search/tweets', {q: event.title}, function(error, tweets, response){
+  return new Promise(function(resolve, reject) {
+    client.get('search/tweets', {q: event.title}, function(error, tweets, response){
       tweets.statuses.forEach(function(specificTweet) {
         var newTweet = {
           created: specificTweet.created_at,
@@ -95,19 +90,9 @@ function getTweets(event) {
           sceenName: specificTweet.user.screen_name,
           userPicture: specificTweet.user.profile_image_url
         }
-        event.twitter.push(newTweet)
+        event.twitter.push(newTweet);
       })
-
-      console.log(JSON.stringify(event))
-  });
+      resolve();
+    }); 
+  })
 }
-
-client.stream('statuses/filter', {track: 'yungkoum'},  function(stream){
-  stream.on('data', function(tweet) {
-    console.log(tweet.text);
-  });
-
-  stream.on('error', function(error) {
-    console.log(error);
-  });
-});
