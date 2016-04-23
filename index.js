@@ -67,9 +67,10 @@ callback = function(response) {
         title: event.title,
         category: eventCategory,
         link: eventURL,
-        geometries: event.geometries 
+        geometries: event.geometries, 
+        twitter: []
       }
-      console.log(newEvent)
+      getTweets(newEvent)
     })
   });
 }
@@ -87,8 +88,17 @@ var client = new Twitter({
 function getTweets(event) {
   client.get('search/tweets', {q: event.title}, function(error, tweets, response){
       tweets.statuses.forEach(function(specificTweet) {
-        nasaData
+        var newTweet = {
+          created: specificTweet.created_at,
+          text: specificTweet.text,
+          name: specificTweet.user.name,
+          sceenName: specificTweet.user.screen_name,
+          userPicture: specificTweet.user.profile_image_url
+        }
+        event.twitter.push(newTweet)
       })
+
+      console.log(JSON.stringify(event))
   });
 }
 
