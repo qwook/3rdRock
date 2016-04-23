@@ -2,11 +2,50 @@
 <html>
 <head>
   <title></title>
+  <style type="text/css">
+    #canvasWrapper {
+      position: relative;
+      display: inline-block;
+      overflow: hidden;
+    }
+
+    .popupDisplay {
+      font-family: Helvetica;
+      color: white;
+      background: rgba(0,0,0, 0.7);
+      position: absolute;
+      display: block;
+      z-index: 1000;
+      border-radius: 6px;
+      padding: 10px;
+    }
+  </style>
 </head>
 <body>
-  <canvas width="500" height="500" id="earth"></canvas>
+  <div id="canvasWrapper">
+    <canvas width="500" height="500" id="earth"></canvas>
+  </div>
+
+  <script type="text/javascript">
+    window.global = window;
+  </script>
+
   <script src="//localhost:35729/livereload.js"></script>
+  <script type="text/javascript" src="bluebird/js/browser/bluebird.js"></script>
   <script type="text/javascript" src="three.js/build/three.js"></script>
+
+  <!-- Shaders -->
+  <script src="three.js/examples/js/shaders/BleachBypassShader.js"></script>
+  <script src="three.js/examples/js/shaders/ColorCorrectionShader.js"></script>
+  <script src="three.js/examples/js/shaders/CopyShader.js"></script>
+  <script src="three.js/examples/js/shaders/FXAAShader.js"></script>
+
+  <script src="three.js/examples/js/postprocessing/EffectComposer.js"></script>
+  <script src="three.js/examples/js/postprocessing/RenderPass.js"></script>
+  <script src="three.js/examples/js/postprocessing/ShaderPass.js"></script>
+  <script src="three.js/examples/js/postprocessing/MaskPass.js"></script>
+
+
   <script type="text/javascript" src="three.js/examples/js/renderers/Projector.js"></script>
   <script type="text/javascript" src="three.js/examples/js/controls/TrackballControls.js"></script>
   <script type="text/javascript" data-main="src/index.js" src="requirejs/require.js"></script>
