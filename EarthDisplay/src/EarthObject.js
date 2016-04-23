@@ -1,15 +1,18 @@
 
+import * as Loaders from './Loaders.js';
+import Tweet from './Tweet.js';
+
 export default class EarthObject extends THREE.Object3D {
   constructor() {
     super();
 
     this.globeMesh = new THREE.Mesh(
       new THREE.SphereGeometry(10, 50, 50),
-      new THREE.MeshBasicMaterial({
-        map: THREE.ImageUtils.loadTexture('images/2_no_clouds_4k.jpg'),
-        bumpMap: THREE.ImageUtils.loadTexture('images/elev_bump_4k.jpg'),
-        bumpScale: 0.005,
-        specularMap: THREE.ImageUtils.loadTexture('images/water_4k.png'),
+      new THREE.MeshPhongMaterial({
+        map: Loaders.Texture('images/2_no_clouds_4k.jpg'),
+        bumpMap: Loaders.Texture('images/elev_bump_4k.jpg'),
+        bumpScale: 0.5,
+        specularMap: Loaders.Texture('images/water_4k.png'),
         specular: new THREE.Color('grey'),
         // wireframe: true
       })
@@ -18,11 +21,6 @@ export default class EarthObject extends THREE.Object3D {
     this.globeMesh.rotation.x = Math.PI/2;
 
     this.positions = [
-      [0, -20, 10],
-      [0, -10, 10],
-      [0,   0, 10],
-      [0,  10, 10],
-      [0,  20, 10],
       [37.3470201, -121.8935645, 10],
       [40.776255,-74.0137496, 10]
     ]
@@ -50,6 +48,22 @@ export default class EarthObject extends THREE.Object3D {
       this.cubes.push(cube);
 
     }
+
+    var tweet = new Tweet({message: "Hey what's up my dude!"});
+    tweet.position.copy(this.latLongAltToPoint(40.776255,-74.0137496, 10));
+    this.add(tweet);
+
+    var tweet2 = new Tweet({message: "TACO TUUESSS"});
+    tweet2.position.copy(this.latLongAltToPoint(37.3470201, -121.8935645, 10));
+    this.add(tweet2);
+
+    var tweet3 = new Tweet({message: "It's too cold!"});
+    tweet3.position.copy(this.latLongAltToPoint(78.1566962, 21.5959375, 10));
+    this.add(tweet3);
+
+    var tweet4 = new Tweet({message: "nani sore"});
+    tweet4.position.copy(this.latLongAltToPoint(37.6819851,139.3198588, 10));
+    this.add(tweet4);
 
   }
 
