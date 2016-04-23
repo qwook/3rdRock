@@ -8,6 +8,8 @@ Promise.all([
   Loaders.CacheTexture('images/2_no_clouds_4k.jpg'),
   Loaders.CacheTexture('images/elev_bump_4k.jpg'),
   Loaders.CacheTexture('images/water_4k.png'),
+  Loaders.CacheTexture('images/skybox.jpg'),
+  Loaders.CacheTexture('images/hemisphere.png'),
 ]).then(function() {
 
   var canvas = document.getElementById("earth");
@@ -44,6 +46,25 @@ Promise.all([
   }
 
   var controls = new THREE.TrackballControls(camera);
+
+  // Skybox
+
+  var skybox = new THREE.Mesh(
+    new THREE.SphereGeometry(500, 50, 50),
+    new THREE.MeshBasicMaterial({
+      map: Loaders.Texture('images/skybox.jpg'),
+      side: THREE.BackSide
+    })
+  );
+  scene.add(skybox);
+
+  // Hemisphere
+
+  var map = Loaders.Texture("images/hemisphere.png");
+  var material = new THREE.SpriteMaterial( { map: map, color: 0xffffff, fog: true } );
+  var sprite = new THREE.Sprite( material );
+  sprite.scale.set(35,35,35);
+  scene.add( sprite );
 
   // Rendering Every Frame
   var render = function() {
