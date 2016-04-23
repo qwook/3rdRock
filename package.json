@@ -1,0 +1,22 @@
+{
+  "name": "jiho",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/qwook/3rdRock.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/qwook/3rdRock/issues"
+  },
+  "homepage": "https://github.com/qwook/3rdRock#readme",
+  "dependencies": {
+    "twitter": "^1.2.5"
+  }
+}
