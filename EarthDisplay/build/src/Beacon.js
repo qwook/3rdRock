@@ -82,7 +82,7 @@ define(['exports', './Loaders.js'], function (exports, _Loaders) {
 
       var geometry = new THREE.CylinderGeometry(0.1, 0.2, 5, 6, 6, true);
       var map = Loaders.Texture("images/beacon.png");
-      var material = new THREE.MeshBasicMaterial({ map: map, color: 0xffffff, transparent: true, blending: THREE.Additive });
+      var material = new THREE.MeshBasicMaterial({ map: map, color: 0xffffff, transparent: true, opacity: 0.5 });
       var mesh = new THREE.Mesh(geometry, material);
       _this.add(mesh);
       _this.mesh = mesh;

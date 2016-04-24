@@ -3,6 +3,9 @@ import Beacon from './Beacon.js';
 
 const canvasWrapper = document.getElementById("canvasWrapper");
 
+var leftSide = document.getElementById("leftSide");
+var rightSide = document.getElementById("rightSide");
+
 export default class Tweet extends THREE.Object3D {
 
   constructor(data) {
@@ -83,6 +86,9 @@ export default class Tweet extends THREE.Object3D {
   }
 
   onClick() {
+    leftSide.className = "";
+    rightSide.className = "";
+
     var lol = new THREE.Vector3(0,0,0);
     this.localToWorld(lol);
     // camera.position.copy( lol );
@@ -90,6 +96,7 @@ export default class Tweet extends THREE.Object3D {
     this.goal = lol.multiplyScalar(1.2);
     this.isGoing = true;
     controls.enabled = false;
+    controls.locking = true;
   }
 
   destroy() {
@@ -103,6 +110,9 @@ export default class Tweet extends THREE.Object3D {
       if ( camera.position.distanceTo(this.goal) < 0.1 ) {
         this.isGoing = false;
         controls.enabled = true;
+        setTimeout(() => {
+          controls.locking = false;
+        }, 1);
       }
     }
 
