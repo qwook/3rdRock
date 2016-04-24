@@ -74,9 +74,9 @@ class LeftSide extends React.Component {
 
     render() {
         return <div className="container-fluid">
-          <h1>Jiho</h1>
+          <img src="/images/based.png" width="50%" style={{maxWidth: "100px", marginTop:"20px", marginBottom:"20px"}}/>
           <p>{this.state.title}</p>
-          <img src={this.getNasaImage()} />
+          <img src={this.getNasaImage()} width="100%" />
           <hr/>
 
           <h5>Weather</h5>
