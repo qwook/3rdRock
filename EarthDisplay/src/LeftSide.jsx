@@ -116,7 +116,7 @@ class LeftSide extends React.Component {
             }
           })()}
 
-          <p>Made by Aris Koumis and Henry Tran. You made this? Oh. We made this.</p>
+          <p>Made by Aris Koumis and Henry Tran.</p>
         </div>;
     }
 }
