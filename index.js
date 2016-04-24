@@ -6,6 +6,14 @@ var watson = require('watson-developer-cloud');
 var keyword_extractor = require("keyword-extractor");
 var fs = require('fs');
 var spawn = require('child_process').spawn;
+var express = require('express');
+var Primus = require('primus');
+
+var app = express();
+app.use('/', express.static(__dirname + '/public'));
+var server = http.createServer(app);
+server.listen(3000);
+var primus = new Primus(server, {});
 var excludeArray = ['Alabama','Alaska','Arizona','Arkansas','California','Colorado','Connecticut','Delaware','District of Columbia','Florida','Georgia','Hawaii','Idaho','Illinois','Indiana','Iowa','Kansas','Kentucky','Louisiana','Maine','Maryland','Massachusetts','Michigan','Minnesota','Mississippi','Missouri','Montana','Nebraska','Nevada','New Hampshire','New Jersey','New Mexico','New York','North Carolina','North Dakota','Ohio','Oklahoma','Oregon','Pennsylvania','Rhode Island','South Carolina','South Dakota','Tennessee','Texas','Utah','Vermont','Virginia','Washington','West Virginia','Wisconsin','Wyoming', 'January', 'February', 'March', 'April', 'May','June','July','August','September','October','November','December','2016'];
 
 var client = new Twitter({
@@ -25,7 +33,6 @@ function fixedEncodeURIComponent (str) {
     return '%' + c.charCodeAt(0).toString(16);
   });
 }
-
 
 // Step 1: Get data from eonet
 new Promise(function(resolve, reject) {
@@ -110,6 +117,9 @@ new Promise(function(resolve, reject) {
   // map promisses
   Promise.all(promises).then(function() {
     fs.writeFile('data.json', JSON.stringify(nasaData))
+    setInterval(function() {
+      primus.write(nasaData);
+    }, 60000);
   })
 
 });
