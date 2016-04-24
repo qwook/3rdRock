@@ -69,7 +69,25 @@ class LeftSide extends React.Component {
     }
 
     getWeather() {
-      // this.state.weather.metadata.
+      try {
+        var obv = this.state.weather.observation;
+        console.log(obv);
+        console.log(this.state.weather.observation);
+        var ret = {
+          text: "N/A",
+          wind: "N/A",
+          temp: "N/A"
+        };
+
+        try {ret.text = obv.phrase_32char;} catch(e){}
+        try {ret.wind = obv.wdir;} catch(e){}
+        try {ret.temp = obv.metrics.feels_like;} catch(e){}
+
+        console.log(ret);
+        return ret;
+      } catch(e) {
+        return null;
+      }
     }
 
     render() {
@@ -80,9 +98,23 @@ class LeftSide extends React.Component {
           <hr/>
 
           <h5>Weather</h5>
-          <p>N/A</p>
+          {(()=> {
+            var weather = this.getWeather();
+            console.log(weather);
+            if (weather) {
+              return <div>
+                <h6>{weather.text}</h6>
+                <strong>Wind Direction:</strong>&nbsp;{weather.wind}<br/>
+                <strong>Temperature:</strong>&nbsp;{weather.temp}
+              </div>
+            } else {
+              return <p>N/A</p>
+            }
+          })()}
+          
+          <hr/>
 
-          <h5>Mood</h5>
+          <h5>Mood <small>(Powered by Watson)</small></h5>
           {(()=>{
             var watson = this.getWatson();
             if (watson) {
@@ -113,9 +145,12 @@ class LeftSide extends React.Component {
                   </div>
                 </div>
               </div>
+            } else {
+              return <p>N/A</p>
             }
           })()}
 
+          <hr/>
           <p>Made by Aris Koumis and Henry Tran.</p>
         </div>;
     }

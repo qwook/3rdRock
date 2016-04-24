@@ -56,7 +56,7 @@ class RightSide extends React.Component {
                   {(() => {
                     console.log(tweet);
                     if (tweet.media) {
-                      return <div className="thumbnail"><hr/><img src={tweet.media} style={{"maxWidth": "100%"}} /></div>;
+                      return <div><hr/><img src={tweet.media} style={{"maxWidth": "100%"}} /></div>;
                     }
                   })()}
                 </div>
