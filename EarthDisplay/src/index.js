@@ -42,8 +42,8 @@ Promise.all([
 
   var camera = new THREE.PerspectiveCamera(75, width / height, 0.01, 1000);
   camera.position.z = 15;
-  camera.position.x = 0;
-  camera.position.y = 0;
+  camera.position.x = -5;
+  camera.position.y = 10;
   global.camera = camera;
 
   var renderer = new THREE.WebGLRenderer({canvas: canvas});
