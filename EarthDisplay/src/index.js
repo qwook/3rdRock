@@ -11,6 +11,11 @@ Promise.all([
   Loaders.CacheTexture('images/skybox.jpg'),
   Loaders.CacheTexture('images/hemisphere.png'),
   Loaders.CacheTexture('images/beacon.png'),
+  Loaders.CacheTexture('images/earthbump.png'),
+  Loaders.CacheTexture('images/earth_normal.png'),
+  Loaders.CacheTexture('images/earth_lights_lrg.jpg'),
+  Loaders.CacheTexture('images/World-satellite map.png'),
+  Loaders.CacheTexture('images/Earth-clouds-1.png'),
 
   Loaders.CacheJSON('dataForHenry.json')
 ]).then(function() {
@@ -48,6 +53,7 @@ Promise.all([
   controls.enablePan = false;
   controls.minDistance = 12;
   controls.maxDistance = 35;
+  global.controls = controls;
 
   // Skybox
 
@@ -95,10 +101,16 @@ Promise.all([
     camera.updateProjectionMatrix();
   });
 
+  global.currentTime = (new Date()).getTime();
+  global.lastTime = global.currentTime;
+  global.deltaTime = 0;
 
   // Rendering Every Frame
   var render = function() {
     requestAnimationFrame(render);
+
+    global.currentTime = (new Date()).getTime();
+    global.deltaTime = global.currentTime - global.lastTime;
 
     global.events.dispatchEvent({type: "update"});
 
@@ -113,6 +125,8 @@ Promise.all([
 
     earth.update();
     renderer.render(scene, camera);
+
+    global.lastTime = global.currentTime;
   };
   render();
 

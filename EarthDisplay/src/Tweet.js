@@ -17,6 +17,18 @@ export default class Tweet extends THREE.Object3D {
 
     canvasWrapper.appendChild(tweetEle);
 
+    this.tweetBlocks = [];
+
+    for (var tweet of data.tweets) {
+      var tweetBlockEle = document.createElement("div");
+      tweetBlockEle.className = "popupDisplay tweetBlock tweet";
+      tweetBlockEle.textContent = tweet.text;
+      tweetBlockEle.style.top = "0px";
+      tweetBlockEle.style.left = "0px";
+      tweetEle.appendChild(tweetBlockEle);
+      this.tweetBlocks.push(tweetBlockEle);
+    }
+
 
     // var geometry = new THREE.SphereGeometry(0.5, 5, 5);
     // var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
@@ -40,6 +52,8 @@ export default class Tweet extends THREE.Object3D {
       global.events.removeEventListener('update', updateListener);
     })
 
+    this.hovering = false;
+
     this.tweetEle.addEventListener('mouseover', (e) => {
       var children = this.tweetEle.parentNode.childNodes;
       for (var i in children) {
@@ -47,11 +61,12 @@ export default class Tweet extends THREE.Object3D {
         if (child.classList && child.classList.contains && child.classList.contains("popupDisplay") > 0) {
           child.overrideOpacity = true;
           child.style.opacity = 0.11;
-          console.log(child);
         }
       }
       this.tweetEle.overrideOpacity = true;
       this.tweetEle.style.opacity = 1;
+
+      this.hovering = true;
     });
 
     this.tweetEle.addEventListener('mouseleave', (e) => {
@@ -62,10 +77,20 @@ export default class Tweet extends THREE.Object3D {
           child.overrideOpacity = false;
         }
       }
+
+      this.hovering = false;
     });
 
+    this.isGoing = false;
+
     this.tweetEle.addEventListener('click', (e) => {
-      console.log(this);
+      var lol = new THREE.Vector3(0,0,0);
+      this.localToWorld(lol);
+      // camera.position.copy( lol );
+
+      this.goal = lol.multiplyScalar(1.2);
+      this.isGoing = true;
+      controls.enabled = false;
     });
 
   }
@@ -76,7 +101,14 @@ export default class Tweet extends THREE.Object3D {
 
   update() {
 
-    super.updateMatrixWorld()
+    if (this.isGoing) {
+      camera.position.lerp(this.goal, 0.05);
+      if ( camera.position.distanceTo(this.goal) < 0.1 ) {
+        this.isGoing = false;
+        controls.enabled = true;
+      }
+    }
+
 
     var pos3D = this.localToWorld(new THREE.Vector3(0,0,0));
 
@@ -88,7 +120,8 @@ export default class Tweet extends THREE.Object3D {
     this.tweetEle.style.top = Math.floor(window.innerHeight-Math.floor((pos.y+1)/2*window.innerHeight)) + 'px';
     // this.tweetEle.style.opacity
 
-    var opacity = (10-camera.position.distanceTo(pos3D))/10;
+    var dist = camera.position.length();
+    var opacity = (dist-camera.position.distanceTo(pos3D))/dist;
     if (opacity < 0) {
       opacity = 0;
       this.tweetEle.style.display = 'none';
@@ -105,6 +138,10 @@ export default class Tweet extends THREE.Object3D {
     }
 
     this.lookAt(new THREE.Vector3(0,0,0));
+
+    if (this.hover) {
+      
+    }
 
   }
 
