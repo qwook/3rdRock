@@ -10,6 +10,8 @@ document.body.addEventListener( 'mousemove', onMouseMove, false );
 
 var leftSide = document.getElementById("leftSide");
 var rightSide = document.getElementById("rightSide");
+var biggieSmalls = document.getElementById("biggieSmalls");
+var closeButton = document.getElementById("close");
 
 var onCanvas = false;
 function onMouseMove( event ) {
@@ -146,6 +148,13 @@ export default class EarthObject extends THREE.Object3D {
 
       leftSide.className = "inside";
       rightSide.className = "inside";
+      biggieSmalls.className = "inside";
+    });
+
+    closeButton.addEventListener('click', function() {
+      leftSide.className = "inside";
+      rightSide.className = "inside";
+      biggieSmalls.className = "inside";
     });
 
   }
