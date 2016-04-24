@@ -1,4 +1,5 @@
 var http = require('http');
+var https = require('https');
 var Promise = require("bluebird");
 var Twitter = require('twitter');
 var watson = require('watson-developer-cloud');
@@ -82,7 +83,6 @@ new Promise(function(resolve, reject) {
     }
     nasaData.events.push(newEvent);
 
-    // Get all the tweets for each event
     promises.push(getMedia(newEvent))
   })
 
@@ -123,6 +123,8 @@ function getMedia(event) {
     return getWatsonData(event, twitterString);
   }).then(function() {
     return getAlchemyData(event);
+  }).then(function() {
+    return getWeatherData(event);
   });
 }
 
@@ -163,7 +165,7 @@ function getAlchemyData(event) {
     var string = fixedEncodeURIComponent(event.title);
     var alchemyOptions = {
       host: 'access.alchemyapi.com',
-      path: "/calls/data/GetNews?apikey=***REMOVED***&return=enriched.url.url,enriched.url.title&start=1460851200&end=1461538800&q.enriched.url.text="+string+"&count=1&outputMode=json"
+      path: "/calls/data/GetNews?apikey=***REMOVED***&return=enriched.url.url,enriched.url.title&start=1460851200&end=1461538800&q.enriched.url.text="+string+"&count=5&outputMode=json"
       //CHANGE COUNT=1 TO COUNT = 10 LATER
     };
     http.request(alchemyOptions, function(response) {
@@ -178,6 +180,38 @@ function getAlchemyData(event) {
       response.on('end', function () {
         data = JSON.parse(str)
         event.alchemy.push(data)
+        resolve();
+      });
+    }).end();
+  })
+}
+
+function getWeatherData(event) {
+  return new Promise(function(resolve, reject) {
+    var geo;
+    if (event.geometries[0].type == "Point") {
+      geo = event.geometries[0].coordinates.reverse().join();
+    } else {
+      geo = event.geometries[0].coordinates[0][0].reverse().join();
+    }
+    geo = fixedEncodeURIComponent(geo);
+    var weatherOptions = {
+      host: 'twcservice.mybluemix.net',
+      port: '443',
+      path: '/api/weather/v2/observations/current?units=m&geocode='+geo+'&language=en-US',
+      auth: '***REMOVED***'
+    }
+    https.request(weatherOptions, function(response) {
+      var data;
+      var str = "";
+
+      response.on('data', function (chunk) {
+        str += chunk.toString();
+      });
+
+      response.on('end', function () {
+        data = JSON.parse(str);
+        event.weather = data;
         resolve();
       });
     }).end();
