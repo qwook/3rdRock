@@ -18,6 +18,7 @@
   "homepage": "https://github.com/qwook/3rdRock#readme",
   "dependencies": {
     "bluebird": "^3.3.5",
-    "twitter": "^1.2.5"
+    "twitter": "^1.2.5",
+    "watson-developer-cloud": "^1.4.1"
   }
 }
