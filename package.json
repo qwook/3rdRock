@@ -18,9 +18,12 @@
   "homepage": "https://github.com/qwook/3rdRock#readme",
   "dependencies": {
     "bluebird": "^3.3.5",
+    "express": "^4.13.4",
     "hdb": "^0.5.5",
     "keyword-extractor": "0.0.12",
+    "primus": "^5.1.0",
     "twitter": "^1.2.5",
-    "watson-developer-cloud": "^1.4.1"
+    "watson-developer-cloud": "^1.4.1",
+    "ws": "^1.1.0"
   }
 }

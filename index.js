@@ -134,14 +134,20 @@ function getMedia(event) {
   return new Promise(function(resolve, reject) {
     client.get('search/tweets', {q: title}, function(error, tweets, response){
       var twitterString = '';
-
+      var mediaUrl = ''
       tweets.statuses.forEach(function(specificTweet) {
+        if (typeof specificTweet.entities.media == "undefined") {
+          mediaUrl = null;
+        } else {
+          mediaUrl = specificTweet.entities.media[0].media_url
+        }
         var newTweet = {
           created: specificTweet.created_at,
           text: specificTweet.text,
           name: specificTweet.user.name,
-          sceenName: specificTweet.user.screen_name,
-          userPicture: specificTweet.user.profile_image_url
+          screenName: specificTweet.user.screen_name,
+          userPicture: specificTweet.user.profile_image_url,
+          media: mediaUrl
         }
         twitterString += newTweet.text
         event.twitter.push(newTweet);
@@ -187,7 +193,7 @@ function getAlchemyData(event) {
     
     var alchemyOptions = {
       host: 'access.alchemyapi.com',
-      path: "/calls/data/GetNews?apikey=bb59f6386664a55165bae9aeb901fb281488775d&return=enriched.url.url,enriched.url.title&start=1460851200&end=1461538800&q.enriched.url.text=A["+extractedString+"]+&count=5&outputMode=json"
+      path: "/calls/data/GetNews?apikey=***REMOVED***&return=enriched.url.url,enriched.url.title&start=1460851200&end=1461538800&q.enriched.url.text=A["+extractedString+"]+&count=5&outputMode=json"
       //CHANGE COUNT=1 TO COUNT=5 LATER
     };
     http.request(alchemyOptions, function(response) {
