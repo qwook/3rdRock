@@ -3,9 +3,13 @@ import * as Loaders from './Loaders.js';
 import Tweet from './Tweet.js';
 
 var raycaster = new THREE.Raycaster();
+
 var mouse = new THREE.Vector2();
 
-window.addEventListener( 'mousemove', onMouseMove, false );
+document.body.addEventListener( 'mousemove', onMouseMove, false );
+
+var leftSide = document.getElementById("leftSide");
+var rightSide = document.getElementById("rightSide");
 
 var onCanvas = false;
 function onMouseMove( event ) {
@@ -58,12 +62,23 @@ export default class EarthObject extends THREE.Object3D {
     this.cloudMesh.rotation.x = Math.PI/2;
     this.beacons = [];
 
+    // todo: destroy these event listeners...
+
     window.addEventListener( 'click', (e) => {
       if (e.target.id == "earth") {
         if (this.lastIntersect) {
           this.lastIntersect.object.parent.parent.onClick();
         }
       }
+    });
+
+    controls.addEventListener('change', function() {
+      if (controls.locking) {
+        return;
+      }
+
+      leftSide.className = "inside";
+      rightSide.className = "inside";
     });
 
   }

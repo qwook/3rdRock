@@ -45,31 +45,6 @@ define(["exports", "./Beacon.js"], function (exports, _Beacon) {
     return call && (typeof call === "object" || typeof call === "function") ? call : self;
   }
 
-  var _get = function get(object, property, receiver) {
-    if (object === null) object = Function.prototype;
-    var desc = Object.getOwnPropertyDescriptor(object, property);
-
-    if (desc === undefined) {
-      var parent = Object.getPrototypeOf(object);
-
-      if (parent === null) {
-        return undefined;
-      } else {
-        return get(parent, property, receiver);
-      }
-    } else if ("value" in desc) {
-      return desc.value;
-    } else {
-      var getter = desc.get;
-
-      if (getter === undefined) {
-        return undefined;
-      }
-
-      return getter.call(receiver);
-    }
-  };
-
   function _inherits(subClass, superClass) {
     if (typeof superClass !== "function" && superClass !== null) {
       throw new TypeError("Super expression must either be null or a function, not " + typeof superClass);
@@ -88,6 +63,9 @@ define(["exports", "./Beacon.js"], function (exports, _Beacon) {
 
   var canvasWrapper = document.getElementById("canvasWrapper");
 
+  var leftSide = document.getElementById("leftSide");
+  var rightSide = document.getElementById("rightSide");
+
   var Tweet = function (_THREE$Object3D) {
     _inherits(Tweet, _THREE$Object3D);
 
@@ -105,15 +83,11 @@ define(["exports", "./Beacon.js"], function (exports, _Beacon) {
 
       canvasWrapper.appendChild(tweetEle);
 
-      // var geometry = new THREE.SphereGeometry(0.5, 5, 5);
-      // var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-      // var cube = new THREE.Mesh( geometry, material );
-      // this.add( cube );
-
       var beacon = new _Beacon2.default();
       _this.add(beacon);
       beacon.rotation.x = -Math.PI / 2;
-      beacon.position.z = -3;
+      beacon.position.z = -2.5;
+      _this.beacon = beacon;
 
       var updateListener = function () {
         _this.update();
@@ -126,10 +100,72 @@ define(["exports", "./Beacon.js"], function (exports, _Beacon) {
         global.events.removeEventListener('update', updateListener);
       });
 
+      _this.hovering = false;
+
+      _this.tweetEle.addEventListener('mouseover', function (e) {
+        _this.startHover();
+      });
+
+      _this.tweetEle.addEventListener('mouseleave', function (e) {
+        _this.stopHover();
+      });
+
+      _this.hoverTime = 0;
+
+      _this.isGoing = false;
+
+      _this.tweetEle.addEventListener('click', function (e) {
+        _this.onClick();
+      });
+
       return _this;
     }
 
     _createClass(Tweet, [{
+      key: "startHover",
+      value: function startHover() {
+        var children = this.tweetEle.parentNode.childNodes;
+        for (var i in children) {
+          var child = children[i];
+          if (child.classList && child.classList.contains && child.classList.contains("popupDisplay") > 0) {
+            child.overrideOpacity = true;
+            child.style.opacity = 0.11;
+          }
+        }
+        this.tweetEle.overrideOpacity = true;
+        this.tweetEle.style.opacity = 1;
+        this.beacon.mesh.material.opacity = 1;
+        this.hovering = true;
+      }
+    }, {
+      key: "stopHover",
+      value: function stopHover() {
+        var children = this.tweetEle.parentNode.childNodes;
+        for (var i in children) {
+          var child = children[i];
+          if (child.classList && child.classList.contains && child.classList.contains("popupDisplay") > 0) {
+            child.overrideOpacity = false;
+          }
+        }
+        this.beacon.mesh.material.opacity = 0.5;
+        this.hovering = false;
+      }
+    }, {
+      key: "onClick",
+      value: function onClick() {
+        leftSide.className = "";
+        rightSide.className = "";
+
+        var lol = new THREE.Vector3(0, 0, 0);
+        this.localToWorld(lol);
+        // camera.position.copy( lol );
+
+        this.goal = lol.multiplyScalar(1.2);
+        this.isGoing = true;
+        controls.enabled = false;
+        controls.locking = true;
+      }
+    }, {
       key: "destroy",
       value: function destroy() {
         this.tweetEle.parentNode.removeChild(this.tweetEle);
@@ -138,7 +174,16 @@ define(["exports", "./Beacon.js"], function (exports, _Beacon) {
       key: "update",
       value: function update() {
 
-        _get(Object.getPrototypeOf(Tweet.prototype), "updateMatrixWorld", this).call(this);
+        if (this.isGoing) {
+          camera.position.lerp(this.goal, 0.1);
+          if (camera.position.distanceTo(this.goal) < 0.1) {
+            this.isGoing = false;
+            controls.enabled = true;
+            setTimeout(function () {
+              controls.locking = false;
+            }, 1);
+          }
+        }
 
         var pos3D = this.localToWorld(new THREE.Vector3(0, 0, 0));
 
@@ -147,19 +192,34 @@ define(["exports", "./Beacon.js"], function (exports, _Beacon) {
         var pos = calc3Dto2D(pos3D);
         // console.log(pos);
         this.tweetEle.style.left = Math.floor((pos.x + 1) / 2 * window.innerWidth) + 'px';
-        this.tweetEle.style.top = window.innerHeight - Math.floor((pos.y + 1) / 2 * window.innerHeight) + 'px';
+        this.tweetEle.style.top = Math.floor(window.innerHeight - Math.floor((pos.y + 1) / 2 * window.innerHeight)) + 'px';
         // this.tweetEle.style.opacity
 
-        var opacity = (15 - camera.position.distanceTo(pos3D)) / 15;
-        if (opacity < 0) {
-          opacity = 0;
+        if (!this.tweetEle.overrideOpacity) {
+          var dist = camera.position.length() / 2;
+          var opacity = (dist - camera.position.distanceTo(pos3D)) / dist;
+          if (opacity < 0) {
+            opacity = 0;
+            this.tweetEle.style.display = 'none';
+          } else {
+            this.tweetEle.style.display = 'inline-block';
+          }
+
+          if (opacity > 1) {
+            opacity = 1;
+          }
+
+          this.tweetEle.style.opacity = opacity;
         }
 
-        if (opacity > 1) {
-          opacity = 1;
+        if (this.tweetEle.style.opacity <= 0) {
+          this.tweetEle.style.opacity = 0;
+          this.tweetEle.style.display = 'none';
+        } else {
+          if (this.hovering) {
+            this.tweetEle.style.display = 'inline-block';
+          }
         }
-
-        this.tweetEle.style.opacity = opacity;
 
         this.lookAt(new THREE.Vector3(0, 0, 0));
       }

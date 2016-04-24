@@ -2,6 +2,13 @@
 <html>
 <head>
   <title></title>
+  <!-- Bootstrap -->
+
+  <link rel="stylesheet" type="text/css" href="bootstrap.css">
+  <!-- <link rel="stylesheet" type="text/css" href="bootstrap/dist/css/bootstrap.css"> -->
+  <link rel="stylesheet" type="text/css" href="bootstrap/dist/css/bootstrap-theme.css">
+
+  <!--  -->
   <style type="text/css">
     #canvasWrapper {
       position: relative;
@@ -63,6 +70,46 @@
       width: 100%;
       height: 100%;
     }
+
+    #leftSide {
+      display: block;
+      position: absolute;
+      background-color: #060606;
+      top: 0;
+      bottom: 0;
+      width: 30%;
+      left: 0%;
+
+      z-index: 500;
+
+      transition: left 0.5s;
+
+      opacity: 0.9;
+    }
+
+    #leftSide.inside {
+      left: -30%;
+    }
+
+    #rightSide {
+      display: block;
+      position: absolute;
+      background-color: #060606;
+      top: 0;
+      bottom: 0;
+      width: 30%;
+      right: 0%;
+
+      z-index: 500;
+
+      transition: right 0.5s;
+
+      opacity: 0.9;
+    }
+
+    #rightSide.inside {
+      right: -30%;
+    }
   </style>
 </head>
 <body>
@@ -70,11 +117,42 @@
     <canvas width="500" height="500" id="earth"></canvas>
   </div>
 
+  <div id="leftSide" class="inside">
+    <div class="container-fluid">
+      <h1>Event Name</h1>
+      <hr/>
+
+      <h5>Weather</h5>
+      <h5>Relevant Articles</h5>
+      <br/>
+      <br/>
+      <br/>
+      <hr/>
+      <p>Made by Aris Koumis and Henry Tran. You made this? Oh. We made this.</p>
+    </div>
+  </div>
+
+  <div id="rightSide" class="inside">
+    <div class="container-fluid">
+      <h1>Misc</h1>
+      <hr/>
+
+      <h5>Twitter</h5>
+    </div>
+  </div>
+
   <script type="text/javascript">
     window.global = window;
   </script>
 
   <script src="//localhost:35729/livereload.js"></script>
+
+  <!-- Bootstrap -->
+
+  <script type="text/javascript" src="bootstrap/dist/js/bootstrap.js"></script>
+
+  <!--  -->
+
   <script type="text/javascript" src="bluebird/js/browser/bluebird.js"></script>
   <script type="text/javascript" src="three.js/build/three.js"></script>
   <script type="text/javascript" src="jquery/dist/jquery.js"></script>

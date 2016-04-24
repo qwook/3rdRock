@@ -30,7 +30,7 @@ define(['./src/Loaders.js', './src/EarthObject.js'], function (_Loaders, _EarthO
 
   global.events = new THREE.EventDispatcher();
 
-  Promise.all([Loaders.CacheTexture('images/2_no_clouds_4k.jpg'), Loaders.CacheTexture('images/elev_bump_4k.jpg'), Loaders.CacheTexture('images/water_4k.png'), Loaders.CacheTexture('images/skybox.jpg'), Loaders.CacheTexture('images/hemisphere.png'), Loaders.CacheTexture('images/beacon.png'), Loaders.CacheJSON('dataForHenry.json')]).then(function () {
+  Promise.all([Loaders.CacheTexture('images/2_no_clouds_4k.jpg'), Loaders.CacheTexture('images/elev_bump_4k.jpg'), Loaders.CacheTexture('images/water_4k.png'), Loaders.CacheTexture('images/skybox.jpg'), Loaders.CacheTexture('images/hemisphere.png'), Loaders.CacheTexture('images/beacon.png'), Loaders.CacheTexture('images/earthbump.png'), Loaders.CacheTexture('images/earth_normal.png'), Loaders.CacheTexture('images/earth_lights_lrg.jpg'), Loaders.CacheTexture('images/World-satellite map.png'), Loaders.CacheTexture('images/Earth-clouds-1.png'), Loaders.CacheJSON('dataForHenry.json')]).then(function () {
 
     var canvas = document.getElementById("earth");
 
@@ -54,14 +54,18 @@ define(['./src/Loaders.js', './src/EarthObject.js'], function (_Loaders, _EarthO
     directionalLight.position.set(0, 1, 0);
     scene.add(directionalLight);
 
-    var directionalLight = new THREE.HemisphereLight(0xffffff, 0.5);
-    scene.add(directionalLight);
+    var directionalLight2 = new THREE.AmbientLight(0xffffff, 0.5);
+    scene.add(directionalLight2);
 
     global.calc3Dto2D = function (vector) {
       return vector.clone().project(camera);
     };
 
     var controls = new THREE.TrackballControls(camera);
+    controls.enablePan = false;
+    controls.minDistance = 12;
+    controls.maxDistance = 35;
+    global.controls = controls;
 
     // Skybox
 
@@ -106,9 +110,16 @@ define(['./src/Loaders.js', './src/EarthObject.js'], function (_Loaders, _EarthO
       camera.updateProjectionMatrix();
     });
 
+    global.currentTime = new Date().getTime();
+    global.lastTime = global.currentTime;
+    global.deltaTime = 0;
+
     // Rendering Every Frame
     var render = function () {
       requestAnimationFrame(render);
+
+      global.currentTime = new Date().getTime();
+      global.deltaTime = global.currentTime - global.lastTime;
 
       global.events.dispatchEvent({ type: "update" });
 
@@ -122,6 +133,8 @@ define(['./src/Loaders.js', './src/EarthObject.js'], function (_Loaders, _EarthO
 
       earth.update();
       renderer.render(scene, camera);
+
+      global.lastTime = global.currentTime;
     };
     render();
   });
