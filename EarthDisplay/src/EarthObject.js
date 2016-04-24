@@ -20,34 +20,34 @@ export default class EarthObject extends THREE.Object3D {
     this.add(this.globeMesh);
     this.globeMesh.rotation.x = Math.PI/2;
 
-    this.positions = [
-      [37.3470201, -121.8935645, 10],
-      [40.776255,-74.0137496, 10]
-    ]
+    // this.positions = [
+    //   [37.3470201, -121.8935645, 10],
+    //   [40.776255,-74.0137496, 10]
+    // ]
 
-    this.cubes = [];
+    // this.cubes = [];
 
-    for (var coord of this.positions) {
+    // for (var coord of this.positions) {
 
-      var pos = this.latLongAltToPoint(coord[0], coord[1], coord[2]);
+    //   var pos = this.latLongAltToPoint(coord[0], coord[1], coord[2]);
 
-      var geometry = new THREE.SphereGeometry(0.5, 5, 5);
-      var material;
-      if (coord[1] > 0) {
-        console.log("YOO");
-        material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-      } else if (coord[1] == 0) {
-        material = new THREE.MeshBasicMaterial( { color: 0xff0000 } );
-      } else {
-        material = new THREE.MeshBasicMaterial( { color: 0xff00ff } );
-      }
-      var cube = new THREE.Mesh( geometry, material );
-      cube.position.copy(pos);
-      this.add( cube );
+    //   var geometry = new THREE.SphereGeometry(0.5, 5, 5);
+    //   var material;
+    //   if (coord[1] > 0) {
+    //     console.log("YOO");
+    //     material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+    //   } else if (coord[1] == 0) {
+    //     material = new THREE.MeshBasicMaterial( { color: 0xff0000 } );
+    //   } else {
+    //     material = new THREE.MeshBasicMaterial( { color: 0xff00ff } );
+    //   }
+    //   var cube = new THREE.Mesh( geometry, material );
+    //   cube.position.copy(pos);
+    //   this.add( cube );
 
-      this.cubes.push(cube);
+    //   this.cubes.push(cube);
 
-    }
+    // }
 
     // var tweet = new Tweet({message: "Hey what's up my dude!"});
     // tweet.position.copy(this.latLongAltToPoint(40.776255,-74.0137496, 10));
@@ -74,14 +74,14 @@ export default class EarthObject extends THREE.Object3D {
   }
 
   update() {
-    var i = 0;
-    for (var coord of this.positions) {
-      var pos = this.latLongAltToPoint(coord[0], coord[1], coord[2]);
+    // var i = 0;
+    // for (var coord of this.positions) {
+    //   var pos = this.latLongAltToPoint(coord[0], coord[1], coord[2]);
 
-      this.cubes[i].position.copy(pos);
-      i++;
+    //   this.cubes[i].position.copy(pos);
+    //   i++;
 
-    }
+    // }
     // console.log("yo")
   }
 

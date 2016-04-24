@@ -8,7 +8,7 @@ export default class Beacon extends THREE.Object3D {
 
     var geometry = new THREE.CylinderGeometry(0.1, 0.2, 5, 6, 6, true);
     var map = Loaders.Texture("images/beacon.png");
-    var material = new THREE.MeshBasicMaterial( { map: map, color: 0xffffff, transparent: true, blending: THREE.Additive } );
+    var material = new THREE.MeshBasicMaterial( { map: map, color: 0xffffff, transparent: true } );
     var mesh = new THREE.Mesh( geometry, material );
     this.add( mesh );
     this.mesh = mesh;
