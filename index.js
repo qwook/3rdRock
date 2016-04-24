@@ -4,6 +4,7 @@ var Twitter = require('twitter');
 var watson = require('watson-developer-cloud');
 var fs = require('fs');
 var spawn = require('child_process').spawn;
+var excludeArray = ['Alabama','Alaska','Arizona','Arkansas','California','Colorado','Connecticut','Delaware','District of Columbia','Florida','Georgia','Hawaii','Idaho','Illinois','Indiana','Iowa','Kansas','Kentucky','Louisiana','Maine','Maryland','Massachusetts','Michigan','Minnesota','Mississippi','Missouri','Montana','Nebraska','Nevada','New Hampshire','New Jersey','New Mexico','New York','North Carolina','North Dakota','Ohio','Oklahoma','Oregon','Pennsylvania','Rhode Island','South Carolina','South Dakota','Tennessee','Texas','Utah','Vermont','Virginia','Washington','West Virginia','Wisconsin','Wyoming', 'January', 'February', 'March', 'April', 'May','June','July','August','September','October','November','December','2016'];
 
 var client = new Twitter({
   consumer_key: '***REMOVED***',
@@ -95,8 +96,12 @@ new Promise(function(resolve, reject) {
 //Media
 function getMedia(event) {
   // Step 1: Get tweets based on the events
+  var title = event.title;
+  excludeArray.forEach(function(area) {
+    title = title.toLowerCase().replace(area.toLowerCase(),'')
+  })
   return new Promise(function(resolve, reject) {
-    client.get('search/tweets', {q: event.title}, function(error, tweets, response){
+    client.get('search/tweets', {q: title}, function(error, tweets, response){
       var twitterString = '';
 
       tweets.statuses.forEach(function(specificTweet) {
@@ -124,7 +129,7 @@ function getMedia(event) {
 function getWatsonData(event, twitterString) {
   return new Promise(function(resolve, reject) {
     var urlString = fixedEncodeURIComponent(twitterString);
-    var command = spawn('curl', ['-u', "***REMOVED***", "https://gateway.watsonplatform.net/tone-analyzer-beta/api/v3/tone?version=2016-02-11&text="+urlString ]);
+    var command = spawn('curl', ['-u', "***REMOVED***", "https://gateway.watsonplatform.net/tone-analyzer-beta/api/v3/tone?version=2016-02-11&text="+urlString]);
     var temp = '';
     command.stdout.on('data', (data) => {
       temp += data.toString()
@@ -158,7 +163,8 @@ function getAlchemyData(event) {
     var string = fixedEncodeURIComponent(event.title);
     var alchemyOptions = {
       host: 'access.alchemyapi.com',
-      path: "/calls/data/GetNews?apikey=***REMOVED***&return=enriched.url.url,enriched.url.title&start=1460851200&end=1461538800&q.enriched.url.text="+string+"&count=25&outputMode=json"
+      path: "/calls/data/GetNews?apikey=***REMOVED***&return=enriched.url.url,enriched.url.title&start=1460851200&end=1461538800&q.enriched.url.text="+string+"&count=1&outputMode=json"
+      //CHANGE COUNT=1 TO COUNT = 10 LATER
     };
     http.request(alchemyOptions, function(response) {
 
