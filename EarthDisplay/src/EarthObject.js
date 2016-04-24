@@ -32,9 +32,51 @@ export default class EarthObject extends THREE.Object3D {
 
     Loaders.Texture('images/elev_bump_4k.jpg').generateMipmaps = true;
 
+    Promise.all([
+      Loaders.CacheTexture('/map/0/0'),
+      Loaders.CacheTexture('/map/1/0'),
+      Loaders.CacheTexture('/map/1/1'),
+      Loaders.CacheTexture('/map/0/1'),
+    ]).then((texture) => {
+
+      global.TwoDplane.material.map = Loaders.Texture('/map/0/0');
+      global.TwoDplane.scale.x = 0.5;
+      global.TwoDplane.scale.y = 0.5;
+      global.TwoDplane.position.x = -0.5;
+      global.TwoDplane.position.y = 0.5;
+
+      global.TwoDplane1.material.map = Loaders.Texture('/map/1/0');
+      global.TwoDplane1.scale.x = 0.5;
+      global.TwoDplane1.scale.y = 0.5;
+      global.TwoDplane1.position.x = -0.5;
+      global.TwoDplane1.position.y = -0.5;
+
+      global.TwoDplane2.material.map = Loaders.Texture('/map/0/1');
+      global.TwoDplane2.scale.x = 0.5;
+      global.TwoDplane2.scale.y = 0.5;
+      global.TwoDplane2.position.x = 0.5;
+      global.TwoDplane2.position.y = 0.5;
+
+      global.TwoDplane3.material.map = Loaders.Texture('/map/1/1');
+      global.TwoDplane3.scale.x = 0.5;
+      global.TwoDplane3.scale.y = 0.5;
+      global.TwoDplane3.position.x = 0.5;
+      global.TwoDplane3.position.y = -0.5;
+
+
+      // renderer.render(TwoDscene, TwoDcamera);
+      renderer.render(TwoDscene, TwoDcamera, this.renderTarget);
+      // renderer.render(TwoDscene, TwoDcamera);
+    })
+
+    this.renderTarget = new THREE.WebGLRenderTarget(1024*4, 1024*4);
+    // global.TwoDplane.material.map = Loaders.Texture('images/2_no_clouds_4k.jpg');
+    // renderer.render(TwoDscene, TwoDcamera, this.renderTarget);
+
     this.globeMesh = new THREE.Mesh(
       new THREE.SphereGeometry(10, 50, 50),
       new THREE.MeshPhongMaterial({
+        // map: this.renderTarget,
         map: Loaders.Texture('images/2_no_clouds_4k.jpg'),
         bumpMap: Loaders.Texture('images/earthbump.png'),
         bumpScale: 0.3,
@@ -47,6 +89,30 @@ export default class EarthObject extends THREE.Object3D {
     );
     this.add(this.globeMesh);
     this.globeMesh.rotation.x = Math.PI/2;
+
+
+    this.globeMeshSatellite = new THREE.Mesh(
+      new THREE.SphereGeometry(10, 50, 50),
+      new THREE.MeshBasicMaterial({
+        map: this.renderTarget
+      })
+    );
+    this.add(this.globeMeshSatellite);
+    this.globeMeshSatellite.rotation.x = Math.PI/2;
+
+
+    this.outlineMesh = new THREE.Mesh(
+      new THREE.SphereGeometry(10.1, 50, 50),
+      new THREE.MeshBasicMaterial({
+        // map: Loaders.Texture('images/yes.png'),
+        alphaMap: Loaders.Texture('images/edge_alpha.png'),
+        transparent: true
+      })
+    );
+    this.add(this.outlineMesh);
+    this.outlineMesh.rotation.x = Math.PI/2;
+
+
 
     this.cloudMesh = new THREE.Mesh(
 
@@ -61,6 +127,7 @@ export default class EarthObject extends THREE.Object3D {
 
     this.cloudMesh.rotation.x = Math.PI/2;
     this.beacons = [];
+    this.current = "standard";
 
     // todo: destroy these event listeners...
 
@@ -84,7 +151,7 @@ export default class EarthObject extends THREE.Object3D {
   }
 
   addEvent(event) {
-    var tweet = new Tweet({message: event.title, tweets: event.twitter});
+    var tweet = new Tweet(event);
     var geo = event.geometries[0];
 
     var pos;
@@ -93,6 +160,7 @@ export default class EarthObject extends THREE.Object3D {
     } else {
       pos = event.geometries[0].coordinates[0][0];
     }
+    event.coords = {lat: pos[1], long: pos[0]};
 
     tweet.position.copy(this.latLongAltToPoint(pos[1],pos[0], 10));
     this.add(tweet);
@@ -110,6 +178,18 @@ export default class EarthObject extends THREE.Object3D {
 
     // }
     // console.log("yo")
+
+    if (this.current == "standard") {
+      this.globeMesh.visible = true;
+      this.globeMeshSatellite.visible = false;
+      this.outlineMesh.visible = false;
+      this.cloudMesh.visible = true;
+    } else {
+      this.globeMesh.visible = false;
+      this.globeMeshSatellite.visible = true;
+      this.outlineMesh.visible = true;
+      this.cloudMesh.visible = false;
+    }
 
     raycaster.setFromCamera( mouse, camera ); 
 

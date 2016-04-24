@@ -111,7 +111,43 @@ define(['exports', './Loaders.js', './Tweet.js'], function (exports, _Loaders, _
 
       Loaders.Texture('images/elev_bump_4k.jpg').generateMipmaps = true;
 
+      Promise.all([Loaders.CacheTexture('/map/0/0'), Loaders.CacheTexture('/map/1/0'), Loaders.CacheTexture('/map/1/1'), Loaders.CacheTexture('/map/0/1')]).then(function (texture) {
+
+        global.TwoDplane.material.map = Loaders.Texture('/map/0/0');
+        global.TwoDplane.scale.x = 0.5;
+        global.TwoDplane.scale.y = 0.5;
+        global.TwoDplane.position.x = -0.5;
+        global.TwoDplane.position.y = 0.5;
+
+        global.TwoDplane1.material.map = Loaders.Texture('/map/1/0');
+        global.TwoDplane1.scale.x = 0.5;
+        global.TwoDplane1.scale.y = 0.5;
+        global.TwoDplane1.position.x = -0.5;
+        global.TwoDplane1.position.y = -0.5;
+
+        global.TwoDplane2.material.map = Loaders.Texture('/map/0/1');
+        global.TwoDplane2.scale.x = 0.5;
+        global.TwoDplane2.scale.y = 0.5;
+        global.TwoDplane2.position.x = 0.5;
+        global.TwoDplane2.position.y = 0.5;
+
+        global.TwoDplane3.material.map = Loaders.Texture('/map/1/1');
+        global.TwoDplane3.scale.x = 0.5;
+        global.TwoDplane3.scale.y = 0.5;
+        global.TwoDplane3.position.x = 0.5;
+        global.TwoDplane3.position.y = -0.5;
+
+        // renderer.render(TwoDscene, TwoDcamera);
+        renderer.render(TwoDscene, TwoDcamera, _this.renderTarget);
+        // renderer.render(TwoDscene, TwoDcamera);
+      });
+
+      _this.renderTarget = new THREE.WebGLRenderTarget(1024 * 4, 1024 * 4);
+      // global.TwoDplane.material.map = Loaders.Texture('images/2_no_clouds_4k.jpg');
+      // renderer.render(TwoDscene, TwoDcamera, this.renderTarget);
+
       _this.globeMesh = new THREE.Mesh(new THREE.SphereGeometry(10, 50, 50), new THREE.MeshPhongMaterial({
+        // map: this.renderTarget,
         map: Loaders.Texture('images/2_no_clouds_4k.jpg'),
         bumpMap: Loaders.Texture('images/earthbump.png'),
         bumpScale: 0.3,
@@ -124,6 +160,20 @@ define(['exports', './Loaders.js', './Tweet.js'], function (exports, _Loaders, _
       _this.add(_this.globeMesh);
       _this.globeMesh.rotation.x = Math.PI / 2;
 
+      _this.globeMeshSatellite = new THREE.Mesh(new THREE.SphereGeometry(10, 50, 50), new THREE.MeshBasicMaterial({
+        map: _this.renderTarget
+      }));
+      _this.add(_this.globeMeshSatellite);
+      _this.globeMeshSatellite.rotation.x = Math.PI / 2;
+
+      _this.outlineMesh = new THREE.Mesh(new THREE.SphereGeometry(10.1, 50, 50), new THREE.MeshBasicMaterial({
+        // map: Loaders.Texture('images/yes.png'),
+        alphaMap: Loaders.Texture('images/edge_alpha.png'),
+        transparent: true
+      }));
+      _this.add(_this.outlineMesh);
+      _this.outlineMesh.rotation.x = Math.PI / 2;
+
       _this.cloudMesh = new THREE.Mesh(new THREE.SphereGeometry(10.1, 50, 50), new THREE.MeshBasicMaterial({
         map: Loaders.Texture('images/Earth-clouds-1.png'),
         transparent: true
@@ -132,6 +182,7 @@ define(['exports', './Loaders.js', './Tweet.js'], function (exports, _Loaders, _
 
       _this.cloudMesh.rotation.x = Math.PI / 2;
       _this.beacons = [];
+      _this.current = "standard";
 
       // todo: destroy these event listeners...
 
@@ -158,7 +209,7 @@ define(['exports', './Loaders.js', './Tweet.js'], function (exports, _Loaders, _
     _createClass(EarthObject, [{
       key: 'addEvent',
       value: function addEvent(event) {
-        var tweet = new _Tweet2.default({ message: event.title, tweets: event.twitter });
+        var tweet = new _Tweet2.default(event);
         var geo = event.geometries[0];
 
         var pos;
@@ -167,6 +218,7 @@ define(['exports', './Loaders.js', './Tweet.js'], function (exports, _Loaders, _
         } else {
           pos = event.geometries[0].coordinates[0][0];
         }
+        event.coords = { lat: pos[1], long: pos[0] };
 
         tweet.position.copy(this.latLongAltToPoint(pos[1], pos[0], 10));
         this.add(tweet);
@@ -185,6 +237,18 @@ define(['exports', './Loaders.js', './Tweet.js'], function (exports, _Loaders, _
 
         // }
         // console.log("yo")
+
+        if (this.current == "standard") {
+          this.globeMesh.visible = true;
+          this.globeMeshSatellite.visible = false;
+          this.outlineMesh.visible = false;
+          this.cloudMesh.visible = true;
+        } else {
+          this.globeMesh.visible = false;
+          this.globeMeshSatellite.visible = true;
+          this.outlineMesh.visible = true;
+          this.cloudMesh.visible = false;
+        }
 
         raycaster.setFromCamera(mouse, camera);
 

@@ -11,9 +11,11 @@ export default class Tweet extends THREE.Object3D {
   constructor(data) {
     super();
 
+    this.data = data;
+
     var tweetEle = document.createElement("div");
     tweetEle.className = "popupDisplay tweet";
-    tweetEle.textContent = data.message;
+    tweetEle.textContent = data.title;
     tweetEle.style.top = "0px";
     tweetEle.style.left = "0px";
     this.tweetEle = tweetEle;
@@ -97,6 +99,8 @@ export default class Tweet extends THREE.Object3D {
     this.isGoing = true;
     controls.enabled = false;
     controls.locking = true;
+
+    events.dispatchEvent({type: 'changeFocus', data: this.data});
   }
 
   destroy() {
