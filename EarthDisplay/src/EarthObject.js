@@ -49,22 +49,28 @@ export default class EarthObject extends THREE.Object3D {
 
     }
 
-    var tweet = new Tweet({message: "Hey what's up my dude!"});
-    tweet.position.copy(this.latLongAltToPoint(40.776255,-74.0137496, 10));
+    // var tweet = new Tweet({message: "Hey what's up my dude!"});
+    // tweet.position.copy(this.latLongAltToPoint(40.776255,-74.0137496, 10));
+    // this.add(tweet);
+
+
+  }
+
+  addEvent(event) {
+    var tweet = new Tweet({message: event.title});
+    var geo = event.geometries[0];
+
+    var pos;
+    if (geo.type == "Point") {
+      pos = event.geometries[0].coordinates;
+    } else {
+      pos = event.geometries[0].coordinates[0][0];
+    }
+
+    console.log(pos);
+
+    tweet.position.copy(this.latLongAltToPoint(pos[1],pos[0], 10));
     this.add(tweet);
-
-    var tweet2 = new Tweet({message: "TACO TUUESSS"});
-    tweet2.position.copy(this.latLongAltToPoint(37.3470201, -121.8935645, 10));
-    this.add(tweet2);
-
-    var tweet3 = new Tweet({message: "It's too cold!"});
-    tweet3.position.copy(this.latLongAltToPoint(78.1566962, 21.5959375, 10));
-    this.add(tweet3);
-
-    var tweet4 = new Tweet({message: "nani sore"});
-    tweet4.position.copy(this.latLongAltToPoint(37.6819851,139.3198588, 10));
-    this.add(tweet4);
-
   }
 
   update() {

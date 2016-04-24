@@ -10,12 +10,15 @@ Promise.all([
   Loaders.CacheTexture('images/water_4k.png'),
   Loaders.CacheTexture('images/skybox.jpg'),
   Loaders.CacheTexture('images/hemisphere.png'),
+  Loaders.CacheTexture('images/beacon.png'),
+
+  Loaders.CacheJSON('dataForHenry.json')
 ]).then(function() {
 
   var canvas = document.getElementById("earth");
 
-  var width  = canvas.width,
-      height = canvas.height;
+  var width  = window.innerWidth,
+      height = window.innerHeight;
 
   var scene = new THREE.Scene();
 
@@ -27,10 +30,6 @@ Promise.all([
 
   var renderer = new THREE.WebGLRenderer({canvas: canvas});
   renderer.setSize(width, height);
-
-  var earth = new EarthObject();
-  earth.rotation.x = -Math.PI/2;
-  scene.add(earth);
 
   // Lighting
 
@@ -61,10 +60,38 @@ Promise.all([
   // Hemisphere
 
   var map = Loaders.Texture("images/hemisphere.png");
-  var material = new THREE.SpriteMaterial( { map: map, color: 0xffffff, fog: true } );
-  var sprite = new THREE.Sprite( material );
-  sprite.scale.set(35,35,35);
-  scene.add( sprite );
+  // var material = new THREE.SpriteMaterial( { map: map, color: 0xffffff, transparent: true, fog: true } );
+  // var sprite = new THREE.Sprite( material );
+  // sprite.scale.set(35,35,35);
+  // scene.add( sprite );
+
+  var earth = new EarthObject();
+  earth.rotation.x = -Math.PI/2;
+  scene.add(earth);
+
+  var fakeData = Loaders.getJSON("dataForHenry.json");
+  console.log(fakeData);
+  for (var i in fakeData.events) {
+    earth.addEvent(fakeData.events[i]);
+  }
+
+  var plane = new THREE.PlaneGeometry(1, 1);
+
+  var mat = new THREE.MeshBasicMaterial({
+      map: map,
+      transparent: true
+    })
+
+  var yo = new THREE.Mesh(plane, mat);
+
+  scene.add(yo);
+
+  window.addEventListener('resize', function() {
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+  });
+
 
   // Rendering Every Frame
   var render = function() {
@@ -72,8 +99,16 @@ Promise.all([
 
     global.events.dispatchEvent({type: "update"});
 
-    earth.update();
     controls.update();
+    
+    var opacity = 1/(camera.position.length())*100 + 35;
+    yo.scale.set(opacity,opacity,opacity);
+    yo.rotation.copy(camera.rotation);
+
+    // sprite.position = camera.position.clone().multiplyScalar(-1);
+
+
+    earth.update();
     renderer.render(scene, camera);
   };
   render();
