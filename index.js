@@ -15,7 +15,8 @@ var client = new Twitter({
 });
 
 var nasaData = {
-  events: []
+  events: [],
+  hanaPoints: []
 };
 
 function fixedEncodeURIComponent (str) {
@@ -59,7 +60,16 @@ new Promise(function(resolve, reject) {
 
     var eventCategory;
     var eventURL;
+    var geometry;
 
+    //Calculating geometric points for hanaPoints
+    if (event.geometries[0].type == "Point") {
+      geometry = event.geometries[0].coordinates.reverse();
+    } else {
+      geometry = event.geometries[0].coordinates[0][0].reverse();
+    }
+
+    //Assigning Categories
     if (typeof event.categories[0] != "undefined") {
       eventCategory = event.categories[0].title;
     } else {
@@ -81,8 +91,18 @@ new Promise(function(resolve, reject) {
       watson: [],
       alchemy: []
     }
+    for (var i=0; i<30; i++) {
+      var randomGeometry = []
+      geometry.forEach(function(coordinate) {
+        randomGeometry.push(coordinate +10*(Math.random()-0.5))
+      });
+      var newHanaPoint = {
+        category: eventCategory,
+        geometries: randomGeometry
+      };
+      nasaData.hanaPoints.push(newHanaPoint);
+    }
     nasaData.events.push(newEvent);
-
     promises.push(getMedia(newEvent))
   })
 
@@ -150,7 +170,7 @@ function getAlchemyData(event) {
     var alchemyOptions = {
       host: 'access.alchemyapi.com',
       path: "/calls/data/GetNews?apikey=***REMOVED***&return=enriched.url.url,enriched.url.title&start=1460851200&end=1461538800&q.enriched.url.text="+string+"&count=5&outputMode=json"
-      //CHANGE COUNT=1 TO COUNT = 10 LATER
+      //CHANGE COUNT=1 TO COUNT =5 LATER
     };
     http.request(alchemyOptions, function(response) {
 
