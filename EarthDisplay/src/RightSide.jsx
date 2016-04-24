@@ -65,7 +65,6 @@ class RightSide extends React.Component {
           }
 
           {(() => {
-            console.log(this.state.twitter);
             if (this.state.twitter.length == 0) {
               return <p>No tweets found.</p>
             }
@@ -78,6 +77,11 @@ class RightSide extends React.Component {
               <div key={post.id} className="panel panel-default"><a href={post.url}><div className="panel-body"><h6>{post.title}</h6></div></a></div>
             )
           }
+          {(() => {
+            if (this.getAlchemy().length == 0) {
+              return <p>No articles found.</p>
+            }
+          })()}
 
         </div>;
     }
