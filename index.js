@@ -192,7 +192,7 @@ function getAlchemyData(event) {
     
     var alchemyOptions = {
       host: 'access.alchemyapi.com',
-      path: "/calls/data/GetNews?apikey=***REMOVED***&return=enriched.url.url,enriched.url.title&start=1460851200&end=1461538800&q.enriched.url.text=A["+extractedString+"]+&count=5&outputMode=json"
+      path: "/calls/data/GetNews?apikey=***REMOVED***&return=enriched.url.url,enriched.url.title&start=1460851200&end=1461538800&q.enriched.url.title=A["+extractedString+"]+&count=5&outputMode=json"
       //CHANGE COUNT=1 TO COUNT=5 LATER
     };
     http.request(alchemyOptions, function(response) {
