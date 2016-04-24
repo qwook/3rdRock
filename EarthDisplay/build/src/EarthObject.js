@@ -111,7 +111,7 @@ define(['exports', './Loaders.js', './Tweet.js'], function (exports, _Loaders, _
 
       var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(EarthObject).call(this));
 
-      Loaders.Texture('images/elev_bump_4k.jpg').generateMipmaps = true;
+      // Loaders.Texture('images/elev_bump_4k.jpg').generateMipmaps = true;
 
       Promise.all([Loaders.CacheTexture('/map/0/0'), Loaders.CacheTexture('/map/1/0'), Loaders.CacheTexture('/map/1/1'), Loaders.CacheTexture('/map/0/1')]).then(function (texture) {
 

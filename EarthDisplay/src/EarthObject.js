@@ -32,7 +32,7 @@ export default class EarthObject extends THREE.Object3D {
     super();
 
 
-    Loaders.Texture('images/elev_bump_4k.jpg').generateMipmaps = true;
+    // Loaders.Texture('images/elev_bump_4k.jpg').generateMipmaps = true;
 
     Promise.all([
       Loaders.CacheTexture('/map/0/0'),
