@@ -6,12 +6,17 @@ export default class EarthObject extends THREE.Object3D {
   constructor() {
     super();
 
+
+    Loaders.Texture('images/elev_bump_4k.jpg').generateMipmaps = true;
+
     this.globeMesh = new THREE.Mesh(
       new THREE.SphereGeometry(10, 50, 50),
       new THREE.MeshPhongMaterial({
         map: Loaders.Texture('images/2_no_clouds_4k.jpg'),
-        bumpMap: Loaders.Texture('images/elev_bump_4k.jpg'),
-        bumpScale: 0.5,
+        bumpMap: Loaders.Texture('images/earthbump.png'),
+        bumpScale: 0.3,
+        // normalMap: Loaders.Texture('images/earth_normal.png'),
+        // normalScale: new THREE.Vector2(0.3,0.3),
         specularMap: Loaders.Texture('images/water_4k.png'),
         specular: new THREE.Color('grey'),
         // wireframe: true
@@ -19,6 +24,20 @@ export default class EarthObject extends THREE.Object3D {
     );
     this.add(this.globeMesh);
     this.globeMesh.rotation.x = Math.PI/2;
+
+    this.cloudMesh = new THREE.Mesh(
+
+      new THREE.SphereGeometry(10.1, 50, 50),
+      new THREE.MeshBasicMaterial({
+        map: Loaders.Texture('images/Earth-clouds-1.png'),
+        transparent: true
+      })
+
+    );
+    this.add(this.cloudMesh);
+
+    this.cloudMesh.rotation.x = Math.PI/2;
+
 
     // this.positions = [
     //   [37.3470201, -121.8935645, 10],
@@ -57,7 +76,7 @@ export default class EarthObject extends THREE.Object3D {
   }
 
   addEvent(event) {
-    var tweet = new Tweet({message: event.title});
+    var tweet = new Tweet({message: event.title, tweets: event.twitter});
     var geo = event.geometries[0];
 
     var pos;
@@ -83,6 +102,7 @@ export default class EarthObject extends THREE.Object3D {
 
     // }
     // console.log("yo")
+    this.cloudMesh.rotation.y += deltaTime/10000;
   }
 
   sinTest() {
