@@ -41,7 +41,15 @@ define(['./src/Loaders.js', './src/EarthObject.js', './src/BottomSide.js', './sr
   ReactDOM.render(React.createElement(_RightSide2.default, null), document.getElementById("rightSide"));
   ReactDOM.render(React.createElement(_LeftSide2.default, null), document.getElementById("leftSide"));
 
-  Promise.all([Loaders.CacheTexture('images/2_no_clouds_4k.jpg'), Loaders.CacheTexture('images/elev_bump_4k.jpg'), Loaders.CacheTexture('images/water_4k.png'), Loaders.CacheTexture('images/skybox.jpg'), Loaders.CacheTexture('images/hemisphere.png'), Loaders.CacheTexture('images/beacon.png'), Loaders.CacheTexture('images/earthbump.png'), Loaders.CacheTexture('images/earth_normal.png'), Loaders.CacheTexture('images/earth_lights_lrg.jpg'), Loaders.CacheTexture('images/World-satellite map.png'), Loaders.CacheTexture('images/Earth-clouds-1.png'), Loaders.CacheTexture('images/yes.png'), Loaders.CacheTexture('images/edge_alpha.png'), Loaders.CacheJSON('dataForHenry.json')]).then(function () {
+  Promise.all([Loaders.CacheTexture('images/2_no_clouds_4k.jpg'),
+  // Loaders.CacheTexture('images/elev_bump_4k.jpg'),
+  Loaders.CacheTexture('images/water_4k.png'), Loaders.CacheTexture('images/skybox.jpg'), Loaders.CacheTexture('images/hemisphere.png'), Loaders.CacheTexture('images/beacon.png'), Loaders.CacheTexture('images/earthbump.png'),
+  // Loaders.CacheTexture('images/earth_normal.png'),
+  // Loaders.CacheTexture('images/earth_lights_lrg.jpg'),
+  // Loaders.CacheTexture('images/World-satellite map.png'),
+  Loaders.CacheTexture('images/Earth-clouds-1.png'),
+  // Loaders.CacheTexture('images/yes.png'),
+  Loaders.CacheTexture('images/edge_alpha.png'), Loaders.CacheJSON('dataForHenry.json')]).then(function () {
 
     var canvas = document.getElementById("earth");
 
@@ -77,6 +85,9 @@ define(['./src/Loaders.js', './src/EarthObject.js', './src/BottomSide.js', './sr
     controls.noPan = true;
     controls.minDistance = 12;
     controls.maxDistance = 35;
+    controls.dynamicDampingFactor = 0.4;
+    controls.rotateSpeed = 0.5;
+
     global.controls = controls;
 
     // Skybox
