@@ -103,6 +103,18 @@ export default class EarthObject extends THREE.Object3D {
     // }
     // console.log("yo")
     this.cloudMesh.rotation.y += deltaTime/10000;
+
+    var opacity = camera.position.length() / 15 - 1;
+    console.log(opacity);
+    if (opacity < 0) {
+      opacity = 0;
+    }
+
+    if (opacity > 1) {
+      opacity = 1;
+    }
+
+    this.cloudMesh.material.opacity = opacity;
   }
 
   sinTest() {
