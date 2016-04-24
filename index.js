@@ -144,22 +144,6 @@ function getWatsonData(event, twitterString) {
   });
 }
 
-function getWatsonData(event, twitterString) {
-  return new Promise(function(resolve, reject) {
-    var urlString = fixedEncodeURIComponent(twitterString);
-    var command = spawn('curl', ['-u', "***REMOVED***", "https://gateway.watsonplatform.net/tone-analyzer-beta/api/v3/tone?version=2016-02-11&text="+urlString ]);
-    var temp = '';
-    command.stdout.on('data', (data) => {
-      temp += data.toString()
-    });
-
-    command.on('close', (code) => {
-      event.watson.push(JSON.parse(temp));
-      resolve();
-    });
-  });
-}
-
 function getAlchemyData(event) {
   return new Promise(function(resolve, reject) {
     var string = fixedEncodeURIComponent(event.title);
