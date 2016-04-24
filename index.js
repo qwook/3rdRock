@@ -3,6 +3,7 @@ var https = require('https');
 var Promise = require("bluebird");
 var Twitter = require('twitter');
 var watson = require('watson-developer-cloud');
+var keyword_extractor = require("keyword-extractor");
 var fs = require('fs');
 var spawn = require('child_process').spawn;
 var excludeArray = ['Alabama','Alaska','Arizona','Arkansas','California','Colorado','Connecticut','Delaware','District of Columbia','Florida','Georgia','Hawaii','Idaho','Illinois','Indiana','Iowa','Kansas','Kentucky','Louisiana','Maine','Maryland','Massachusetts','Michigan','Minnesota','Mississippi','Missouri','Montana','Nebraska','Nevada','New Hampshire','New Jersey','New Mexico','New York','North Carolina','North Dakota','Ohio','Oklahoma','Oregon','Pennsylvania','Rhode Island','South Carolina','South Dakota','Tennessee','Texas','Utah','Vermont','Virginia','Washington','West Virginia','Wisconsin','Wyoming', 'January', 'February', 'March', 'April', 'May','June','July','August','September','October','November','December','2016'];
@@ -166,11 +167,18 @@ function getWatsonData(event, twitterString) {
 
 function getAlchemyData(event) {
   return new Promise(function(resolve, reject) {
-    var string = fixedEncodeURIComponent(event.title);
+    var string = event.title;
+    string = string.replace(',','')
+    excludeArray.forEach(function(excludeElement) {
+      string = string.toLowerCase().replace(excludeElement.toLowerCase(),'')
+    })
+    var extractedString = keyword_extractor.extract(string, {language:"english",remove_digits: true,return_changed_case:true,remove_duplicates: false});
+    extractedString = extractedString.join("^")
+    
     var alchemyOptions = {
       host: 'access.alchemyapi.com',
-      path: "/calls/data/GetNews?apikey=***REMOVED***&return=enriched.url.url,enriched.url.title&start=1460851200&end=1461538800&q.enriched.url.text="+string+"&count=5&outputMode=json"
-      //CHANGE COUNT=1 TO COUNT =5 LATER
+      path: "/calls/data/GetNews?apikey=bb59f6386664a55165bae9aeb901fb281488775d&return=enriched.url.url,enriched.url.title&start=1460851200&end=1461538800&q.enriched.url.text=A["+extractedString+"]+&count=5&outputMode=json"
+      //CHANGE COUNT=1 TO COUNT=5 LATER
     };
     http.request(alchemyOptions, function(response) {
 
