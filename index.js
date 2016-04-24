@@ -52,7 +52,6 @@ new Promise(function(resolve, reject) {
   // array of promises
   var promises = [];
 
-  data = JSON.parse(str)
   data.events.forEach(function(event) {
 
     var eventCategory;
@@ -82,12 +81,11 @@ new Promise(function(resolve, reject) {
 
     // Get all the tweets for each event
     promises.push(getTweets(newEvent))
-    // promises.push(getWatsonData(newEvent))
   })
 
   // map promisses
   Promise.all(promises).then(function() {
-    // console.log(JSON.stringify(nasaData))
+    fs.writeFile('data.json', JSON.stringify(nasaData))
   })
 
 });
@@ -119,19 +117,17 @@ function getTweets(event) {
   });
 }
 
-function getWatsonData (newEvent, event) {
+function getWatsonData (event, twitterString) {
   return new Promise(function(resolve, reject) {
     var urlString = fixedEncodeURIComponent(twitterString)
     var command = spawn('curl', ['-u', "***REMOVED***", "https://gateway.watsonplatform.net/tone-analyzer-beta/api/v3/tone?version=2016-02-11&text="+urlString ]);
+    var temp = '';
     command.stdout.on('data', (data) => {
-      newEvent.watson.push(data)
-    });
-
-    command.stderr.on('data', (data) => {
-      console.log(`stderr: ${data}`);
+      temp += data.toString()
     });
 
     command.on('close', (code) => {
+      event.watson.push(JSON.parse(temp));
       resolve();
     });
   });
