@@ -2,21 +2,15 @@ var http = require('http');
 var Promise = require("bluebird");
 var Twitter = require('twitter');
 var watson = require('watson-developer-cloud');
-fs = require('fs');
+var fs = require('fs');
 var spawn = require('child_process').spawn;
-var twitterString = ''
+
 var client = new Twitter({
   consumer_key: '***REMOVED***',
   consumer_secret: '***REMOVED***',
   access_token_key: '***REMOVED***',
   access_token_secret: '***REMOVED***'
 });
-
-//grabbing Data from EONET
-var options = {
-  host: 'eonet.sci.gsfc.nasa.gov',
-  path: '/api/v2.1/events'
-};
 
 var nasaData = {
   events: []
@@ -28,70 +22,83 @@ function fixedEncodeURIComponent (str) {
   });
 }
 
-callback = function(response) {
-  var data;
-  var str = "";
+// Step 1: Get data from eonet
+new Promise(function(resolve, reject) {
 
-  response.on('data', function (chunk) {
-    str += chunk.toString();
-  });
+  var options = {
+    host: 'eonet.sci.gsfc.nasa.gov',
+    path: '/api/v2.1/events'
+  };
 
-  response.on('end', function () {
-    // array of promises
-    var promises = [];
-    data = JSON.parse(str)
-    data.events.forEach(function(event) {
-      var eventCategory;
-      var eventURL;
-      function getEventCategory() {
-        if (typeof event.categories[0] != "undefined") {
-          eventCategory = event.categories[0].title;
-        }
-        else {
-          eventCategory = 'none'
-        }
-      }
-      function getEventURL() {
-        if (typeof event.sources[0] != "undefined") {
-              eventURL = event.sources[0].url;
-            }
-        else {
-          eventURL = 'none'
-        }
-      }
-      getEventURL();
-      getEventCategory();
-      var newEvent = {
-        title: event.title,
-        category: eventCategory,
-        link: eventURL,
-        geometries: event.geometries, 
-        twitter: [],
-        watson: []
-      }
-      nasaData.events.push(newEvent);
-      // push in promises
-      promises.push(getTweets(newEvent))
-      promises.push(getWatsonData(newEvent))
-    })
+  http.request(options, function(response) {
 
-    // map promisses
-    Promise.all(promises).then(function() {
-      return Promise.all()
+    var data;
+    var str = "";
 
-      // console.log(JSON.stringify(nasaData))
-    }).then(function() {
-      
+    response.on('data', function (chunk) {
+      str += chunk.toString();
     });
-    // then send
-  });
-}
 
-http.request(options, callback).end();
+    response.on('end', function () {
+      data = JSON.parse(str)
+      resolve(data);
+    });
+
+  }).end();
+
+// Step 2: Get twitter data for each event
+}).then(function(data) {
+
+  // array of promises
+  var promises = [];
+
+  data = JSON.parse(str)
+  data.events.forEach(function(event) {
+
+    var eventCategory;
+    var eventURL;
+
+    if (typeof event.categories[0] != "undefined") {
+      eventCategory = event.categories[0].title;
+    } else {
+      eventCategory = 'none'
+    }
+
+    if (typeof event.sources[0] != "undefined") {
+      eventURL = event.sources[0].url;
+    } else {
+      eventURL = 'none'
+    }
+
+    var newEvent = {
+      title: event.title,
+      category: eventCategory,
+      link: eventURL,
+      geometries: event.geometries, 
+      twitter: [],
+      watson: []
+    }
+    nasaData.events.push(newEvent);
+
+    // Get all the tweets for each event
+    promises.push(getTweets(newEvent))
+    // promises.push(getWatsonData(newEvent))
+  })
+
+  // map promisses
+  Promise.all(promises).then(function() {
+    // console.log(JSON.stringify(nasaData))
+  })
+
+});
+
 //Twitter
 function getTweets(event) {
+  // Step 1: Get tweets based on the events
   return new Promise(function(resolve, reject) {
     client.get('search/tweets', {q: event.title}, function(error, tweets, response){
+      var twitterString = '';
+
       tweets.statuses.forEach(function(specificTweet) {
         var newTweet = {
           created: specificTweet.created_at,
@@ -103,12 +110,16 @@ function getTweets(event) {
         twitterString += newTweet.text
         event.twitter.push(newTweet);
       })
-      resolve();
+
+      resolve(twitterString);
     }); 
-  })
+  // Step 2: Get watson data after the tweets are done
+  }).then(function(twitterString) {
+    return getWatsonData(event, twitterString);
+  });
 }
 
-var getWatsonData = function(newEvent, event) {
+function getWatsonData (newEvent, event) {
   return new Promise(function(resolve, reject) {
     var urlString = fixedEncodeURIComponent(twitterString)
     var command = spawn('curl', ['-u', "***REMOVED***", "https://gateway.watsonplatform.net/tone-analyzer-beta/api/v3/tone?version=2016-02-11&text="+urlString ]);
