@@ -6,7 +6,7 @@
 
   <link rel="stylesheet" type="text/css" href="bootstrap.css">
   <!-- <link rel="stylesheet" type="text/css" href="bootstrap/dist/css/bootstrap.css"> -->
-  <link rel="stylesheet" type="text/css" href="bootstrap/dist/css/bootstrap-theme.css">
+  <!-- <link rel="stylesheet" type="text/css" href="bootstrap/dist/css/bootstrap-theme.css"> -->
 
   <!--  -->
   <style type="text/css">
@@ -85,6 +85,7 @@
       transition: left 0.5s;
 
       opacity: 0.9;
+      overflow-y: scroll;
     }
 
     #leftSide.inside {
@@ -105,10 +106,19 @@
       transition: right 0.5s;
 
       opacity: 0.9;
+      overflow-y: scroll;
     }
 
     #rightSide.inside {
       right: -30%;
+    }
+
+    #bottomSide {
+      /*text-align: center;*/
+      position: absolute;
+      bottom: 10px;
+      left: 0;
+      right: 0;
     }
   </style>
 </head>
@@ -118,27 +128,13 @@
   </div>
 
   <div id="leftSide" class="inside">
-    <div class="container-fluid">
-      <h1>Event Name</h1>
-      <hr/>
-
-      <h5>Weather</h5>
-      <h5>Relevant Articles</h5>
-      <br/>
-      <br/>
-      <br/>
-      <hr/>
-      <p>Made by Aris Koumis and Henry Tran. You made this? Oh. We made this.</p>
-    </div>
   </div>
 
   <div id="rightSide" class="inside">
-    <div class="container-fluid">
-      <h1>Misc</h1>
-      <hr/>
+  </div>
 
-      <h5>Twitter</h5>
-    </div>
+  <!-- lol -->
+  <div id="bottomSide">
   </div>
 
   <script type="text/javascript">
@@ -153,9 +149,12 @@
 
   <!--  -->
 
+  <script type="text/javascript" src="react.js"></script>
+  <script type="text/javascript" src="react-dom.js"></script>
   <script type="text/javascript" src="bluebird/js/browser/bluebird.js"></script>
   <script type="text/javascript" src="three.js/build/three.js"></script>
   <script type="text/javascript" src="jquery/dist/jquery.js"></script>
+  <script type="text/javascript" src="autolink/autolink-min.js"></script>
 
   <!-- Shaders -->
   <script src="three.js/examples/js/shaders/BleachBypassShader.js"></script>

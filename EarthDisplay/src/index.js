@@ -1,8 +1,19 @@
 
+import './src/ImageLoader_Overwrite.js'
+
 import * as Loaders from './src/Loaders.js';
 import EarthObject from './src/EarthObject.js';
 
+import BottomSide from "./src/BottomSide.js";
+import RightSide from "./src/RightSide.js";
+import LeftSide from "./src/LeftSide.js";
+
 global.events = new THREE.EventDispatcher();
+
+// Load up react
+ReactDOM.render(<BottomSide />, document.getElementById("bottomSide"));
+ReactDOM.render(<RightSide />, document.getElementById("rightSide"));
+ReactDOM.render(<LeftSide />, document.getElementById("leftSide"));
 
 Promise.all([
   Loaders.CacheTexture('images/2_no_clouds_4k.jpg'),
@@ -16,6 +27,8 @@ Promise.all([
   Loaders.CacheTexture('images/earth_lights_lrg.jpg'),
   Loaders.CacheTexture('images/World-satellite map.png'),
   Loaders.CacheTexture('images/Earth-clouds-1.png'),
+  Loaders.CacheTexture('images/yes.png'),
+  Loaders.CacheTexture('images/edge_alpha.png'),
 
   Loaders.CacheJSON('dataForHenry.json')
 ]).then(function() {
@@ -35,6 +48,7 @@ Promise.all([
 
   var renderer = new THREE.WebGLRenderer({canvas: canvas});
   renderer.setSize(width, height);
+  global.renderer = renderer;
 
   // Lighting
 
@@ -49,8 +63,8 @@ Promise.all([
     return vector.clone().project(camera);
   }
 
-  var controls = new THREE.TrackballControls(camera);
-  controls.enablePan = false;
+  var controls = new THREE.TrackballControls(camera, document.getElementById("canvasWrapper"));
+  controls.noPan = true;
   controls.minDistance = 12;
   controls.maxDistance = 35;
   global.controls = controls;
@@ -74,9 +88,40 @@ Promise.all([
   // sprite.scale.set(35,35,35);
   // scene.add( sprite );
 
+  global.TwoDscene = new THREE.Scene();
+  global.TwoDcamera = new THREE.Camera(-0.5, 0.5, -0.5, 0.5, -1, 10000);
+
+  var test = new THREE.Object3D();
+
+  var planeMesh = new THREE.PlaneGeometry(2, 2);
+  global.TwoDplane = new THREE.Mesh(planeMesh, new THREE.MeshBasicMaterial({
+    map: Loaders.Texture('images/hemisphere.png')
+  }));
+  test.add(TwoDplane);
+
+  global.TwoDplane1 = new THREE.Mesh(planeMesh, new THREE.MeshBasicMaterial({
+    map: Loaders.Texture('images/hemisphere.png')
+  }));
+  test.add(TwoDplane1);
+
+  global.TwoDplane2 = new THREE.Mesh(planeMesh, new THREE.MeshBasicMaterial({
+    map: Loaders.Texture('images/hemisphere.png')
+  }));
+  test.add(TwoDplane2);
+
+  global.TwoDplane3 = new THREE.Mesh(planeMesh, new THREE.MeshBasicMaterial({
+    map: Loaders.Texture('images/hemisphere.png')
+  }));
+  test.add(TwoDplane3);
+
+  test.scale.y = 2;
+  TwoDscene.add(test);
+
+
   var earth = new EarthObject();
   earth.rotation.x = -Math.PI/2;
   scene.add(earth);
+  global.earth = earth;
 
   var fakeData = Loaders.getJSON("dataForHenry.json");
   console.log(fakeData);
@@ -125,6 +170,7 @@ Promise.all([
 
     earth.update();
     renderer.render(scene, camera);
+    // renderer.render(TwoDscene, TwoDcamera);
 
     global.lastTime = global.currentTime;
   };

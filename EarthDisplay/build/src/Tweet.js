@@ -74,9 +74,11 @@ define(["exports", "./Beacon.js"], function (exports, _Beacon) {
 
       var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Tweet).call(this));
 
+      _this.data = data;
+
       var tweetEle = document.createElement("div");
       tweetEle.className = "popupDisplay tweet";
-      tweetEle.textContent = data.message;
+      tweetEle.textContent = data.title;
       tweetEle.style.top = "0px";
       tweetEle.style.left = "0px";
       _this.tweetEle = tweetEle;
@@ -164,6 +166,8 @@ define(["exports", "./Beacon.js"], function (exports, _Beacon) {
         this.isGoing = true;
         controls.enabled = false;
         controls.locking = true;
+
+        events.dispatchEvent({ type: 'changeFocus', data: this.data });
       }
     }, {
       key: "destroy",

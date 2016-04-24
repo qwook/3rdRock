@@ -5,12 +5,13 @@ module.exports = function(grunt) {
     'babel': {
       'options': {
         'sourceMap': true,
-        'plugins': ['transform-es2015-modules-amd', 'transform-es2015-classes', 'transform-es2015-arrow-functions', 'transform-es2015-block-scoped-functions', 'transform-es2015-block-scoping']
+        'plugins': ['transform-es2015-modules-amd', 'transform-es2015-classes', 'transform-es2015-arrow-functions', 'transform-es2015-block-scoped-functions', 'transform-es2015-block-scoping'],
+        'presets': ['react']
       },
       'dist': {
         'files': [{
           'expand': true,
-          'src': ['src/**/*.js'],
+          'src': ['src/**/*'],
           'dest': 'build/',
           'ext': '.js'
         }]
@@ -28,7 +29,7 @@ module.exports = function(grunt) {
         'atBegin': true,
       },
       'dev': {
-        'files': ['src/**/*.js', 'public/**/*.*', 'bower_components/**/*'],
+        'files': ['src/**/*', 'public/**/*.*', 'bower_components/**/*'],
         'tasks': ['express:dev', 'babel'],
         'options': {
           'livereload': 35729,

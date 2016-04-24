@@ -16,6 +16,7 @@
     "three.js": "threejs#*",
     "requirejs": "^2.2.0",
     "bluebird": "^3.3.5",
-    "jquery": "^2.2.3"
+    "jquery": "^2.2.3",
+    "autolink": "^1.0.1"
   }
 }
