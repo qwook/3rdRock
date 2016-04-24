@@ -65,6 +65,7 @@ define(["exports", "./Beacon.js"], function (exports, _Beacon) {
 
   var leftSide = document.getElementById("leftSide");
   var rightSide = document.getElementById("rightSide");
+  var biggieSmalls = document.getElementById("biggieSmalls");
 
   var Tweet = function (_THREE$Object3D) {
     _inherits(Tweet, _THREE$Object3D);
@@ -157,6 +158,10 @@ define(["exports", "./Beacon.js"], function (exports, _Beacon) {
       value: function onClick() {
         leftSide.className = "";
         rightSide.className = "";
+        biggieSmalls.className = "";
+        leftSide.scrollTop = 0;
+        rightSide.scrollTop = 0;
+        biggieSmalls.scrollTop = 0;
 
         var lol = new THREE.Vector3(0, 0, 0);
         this.localToWorld(lol);

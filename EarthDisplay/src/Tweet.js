@@ -5,6 +5,7 @@ const canvasWrapper = document.getElementById("canvasWrapper");
 
 var leftSide = document.getElementById("leftSide");
 var rightSide = document.getElementById("rightSide");
+var biggieSmalls = document.getElementById("biggieSmalls");
 
 export default class Tweet extends THREE.Object3D {
 
@@ -90,6 +91,10 @@ export default class Tweet extends THREE.Object3D {
   onClick() {
     leftSide.className = "";
     rightSide.className = "";
+    biggieSmalls.className = "";
+    leftSide.scrollTop = 0;
+    rightSide.scrollTop = 0;
+    biggieSmalls.scrollTop = 0;
 
     var lol = new THREE.Vector3(0,0,0);
     this.localToWorld(lol);

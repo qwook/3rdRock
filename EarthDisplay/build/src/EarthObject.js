@@ -88,6 +88,8 @@ define(['exports', './Loaders.js', './Tweet.js'], function (exports, _Loaders, _
 
   var leftSide = document.getElementById("leftSide");
   var rightSide = document.getElementById("rightSide");
+  var biggieSmalls = document.getElementById("biggieSmalls");
+  var closeButton = document.getElementById("close");
 
   var onCanvas = false;
   function onMouseMove(event) {
@@ -201,6 +203,13 @@ define(['exports', './Loaders.js', './Tweet.js'], function (exports, _Loaders, _
 
         leftSide.className = "inside";
         rightSide.className = "inside";
+        biggieSmalls.className = "inside";
+      });
+
+      closeButton.addEventListener('click', function () {
+        leftSide.className = "inside";
+        rightSide.className = "inside";
+        biggieSmalls.className = "inside";
       });
 
       return _this;
