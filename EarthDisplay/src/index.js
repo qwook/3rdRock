@@ -42,8 +42,8 @@ Promise.all([
   directionalLight.position.set( 0, 1, 0 );
   scene.add( directionalLight );
 
-  var directionalLight = new THREE.HemisphereLight( 0xffffff, 0.5 );
-  scene.add( directionalLight );
+  var directionalLight2 = new THREE.AmbientLight( 0xffffff, 0.5 );
+  scene.add( directionalLight2 );
 
   global.calc3Dto2D = function (vector) {
     return vector.clone().project(camera);

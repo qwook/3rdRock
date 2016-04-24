@@ -2,6 +2,25 @@
 import * as Loaders from './Loaders.js';
 import Tweet from './Tweet.js';
 
+var raycaster = new THREE.Raycaster();
+var mouse = new THREE.Vector2();
+
+window.addEventListener( 'mousemove', onMouseMove, false );
+
+var onCanvas = false;
+function onMouseMove( event ) {
+
+  onCanvas = event.target.id == "earth";
+
+  // calculate mouse position in normalized device coordinates
+  // (-1 to +1) for both components
+
+  mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+  mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;   
+
+}
+
+
 export default class EarthObject extends THREE.Object3D {
   constructor() {
     super();
@@ -37,41 +56,15 @@ export default class EarthObject extends THREE.Object3D {
     this.add(this.cloudMesh);
 
     this.cloudMesh.rotation.x = Math.PI/2;
+    this.beacons = [];
 
-
-    // this.positions = [
-    //   [37.3470201, -121.8935645, 10],
-    //   [40.776255,-74.0137496, 10]
-    // ]
-
-    // this.cubes = [];
-
-    // for (var coord of this.positions) {
-
-    //   var pos = this.latLongAltToPoint(coord[0], coord[1], coord[2]);
-
-    //   var geometry = new THREE.SphereGeometry(0.5, 5, 5);
-    //   var material;
-    //   if (coord[1] > 0) {
-    //     console.log("YOO");
-    //     material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-    //   } else if (coord[1] == 0) {
-    //     material = new THREE.MeshBasicMaterial( { color: 0xff0000 } );
-    //   } else {
-    //     material = new THREE.MeshBasicMaterial( { color: 0xff00ff } );
-    //   }
-    //   var cube = new THREE.Mesh( geometry, material );
-    //   cube.position.copy(pos);
-    //   this.add( cube );
-
-    //   this.cubes.push(cube);
-
-    // }
-
-    // var tweet = new Tweet({message: "Hey what's up my dude!"});
-    // tweet.position.copy(this.latLongAltToPoint(40.776255,-74.0137496, 10));
-    // this.add(tweet);
-
+    window.addEventListener( 'click', (e) => {
+      if (e.target.id == "earth") {
+        if (this.lastIntersect) {
+          this.lastIntersect.object.parent.parent.onClick();
+        }
+      }
+    });
 
   }
 
@@ -86,10 +79,10 @@ export default class EarthObject extends THREE.Object3D {
       pos = event.geometries[0].coordinates[0][0];
     }
 
-    console.log(pos);
-
     tweet.position.copy(this.latLongAltToPoint(pos[1],pos[0], 10));
     this.add(tweet);
+
+    this.beacons.push(tweet);
   }
 
   update() {
@@ -102,10 +95,32 @@ export default class EarthObject extends THREE.Object3D {
 
     // }
     // console.log("yo")
+
+    raycaster.setFromCamera( mouse, camera ); 
+
+    if (onCanvas) {
+      // calculate objects intersecting the picking ray
+      var mesh = [];
+      for (var i in this.beacons) {
+        mesh.push(this.beacons[i].beacon.mesh);
+      }
+
+      var intersects = raycaster.intersectObjects( mesh );
+
+      if (intersects[0] != this.lastIntersect && this.lastIntersect) {
+        this.lastIntersect.object.parent.parent.stopHover();
+      };
+
+      if (intersects[0] && intersects[0] != this.lastIntersect) {
+        intersects[0].object.parent.parent.startHover();
+      }
+      this.lastIntersect = intersects[0];
+    }
+
     this.cloudMesh.rotation.y += deltaTime/10000;
 
     var opacity = camera.position.length() / 15 - 1;
-    console.log(opacity);
+
     if (opacity < 0) {
       opacity = 0;
     }
