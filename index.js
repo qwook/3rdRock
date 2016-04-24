@@ -35,94 +35,93 @@ function fixedEncodeURIComponent (str) {
 }
 
 // Step 1: Get data from eonet
-new Promise(function(resolve, reject) {
+setInterval(function() {
+  new Promise(function(resolve, reject) {
 
-  var nasaOptions = {
-    host: 'eonet.sci.gsfc.nasa.gov',
-    path: '/api/v2.1/events'
-  };
+    var nasaOptions = {
+      host: 'eonet.sci.gsfc.nasa.gov',
+      path: '/api/v2.1/events'
+    };
 
-  http.request(nasaOptions, function(response) {
+    http.request(nasaOptions, function(response) {
 
-    var data;
-    var str = "";
+      var data;
+      var str = "";
 
-    response.on('data', function (chunk) {
-      str += chunk.toString();
-    });
-
-    response.on('end', function () {
-      data = JSON.parse(str)
-      resolve(data);
-    });
-
-  }).end();
-
-// Step 2: Get twitter data for each event
-}).then(function(data) {
-
-  // array of promises
-  var promises = [];
-
-  data.events.forEach(function(event) {
-
-    var eventCategory;
-    var eventURL;
-    var geometry;
-
-    //Calculating geometric points for hanaPoints
-    if (event.geometries[0].type == "Point") {
-      geometry = event.geometries[0].coordinates.reverse();
-    } else {
-      geometry = event.geometries[0].coordinates[0][0].reverse();
-    }
-
-    //Assigning Categories
-    if (typeof event.categories[0] != "undefined") {
-      eventCategory = event.categories[0].title;
-    } else {
-      eventCategory = 'none'
-    }
-
-    if (typeof event.sources[0] != "undefined") {
-      eventURL = event.sources[0].url;
-    } else {
-      eventURL = 'none'
-    }
-
-    var newEvent = {
-      title: event.title,
-      category: eventCategory,
-      link: eventURL,
-      geometries: event.geometries, 
-      twitter: [],
-      watson: [],
-      alchemy: []
-    }
-    for (var i=0; i<30; i++) {
-      var randomGeometry = []
-      geometry.forEach(function(coordinate) {
-        randomGeometry.push(coordinate +10*(Math.random()-0.5))
+      response.on('data', function (chunk) {
+        str += chunk.toString();
       });
-      var newHanaPoint = {
+
+      response.on('end', function () {
+        data = JSON.parse(str)
+        resolve(data);
+      });
+
+    }).end();
+
+  // Step 2: Get twitter data for each event
+  }).then(function(data) {
+
+    // array of promises
+    var promises = [];
+
+    data.events.forEach(function(event) {
+
+      var eventCategory;
+      var eventURL;
+      var geometry;
+
+      //Calculating geometric points for hanaPoints
+      if (event.geometries[0].type == "Point") {
+        geometry = event.geometries[0].coordinates.reverse();
+      } else {
+        geometry = event.geometries[0].coordinates[0][0].reverse();
+      }
+
+      //Assigning Categories
+      if (typeof event.categories[0] != "undefined") {
+        eventCategory = event.categories[0].title;
+      } else {
+        eventCategory = 'none'
+      }
+
+      if (typeof event.sources[0] != "undefined") {
+        eventURL = event.sources[0].url;
+      } else {
+        eventURL = 'none'
+      }
+
+      var newEvent = {
+        title: event.title,
         category: eventCategory,
-        geometries: randomGeometry
-      };
-      nasaData.hanaPoints.push(newHanaPoint);
-    }
-    nasaData.events.push(newEvent);
-    promises.push(getMedia(newEvent))
-  })
+        link: eventURL,
+        geometries: event.geometries, 
+        twitter: [],
+        watson: [],
+        alchemy: []
+      }
+      for (var i=0; i<30; i++) {
+        var randomGeometry = []
+        geometry.forEach(function(coordinate) {
+          randomGeometry.push(coordinate +10*(Math.random()-0.5))
+        });
+        var newHanaPoint = {
+          category: eventCategory,
+          geometries: randomGeometry
+        };
+        nasaData.hanaPoints.push(newHanaPoint);
+      }
+      nasaData.events.push(newEvent);
+      promises.push(getMedia(newEvent))
+    })
 
-  // map promisses
-  Promise.all(promises).then(function() {
-    fs.writeFile('data.json', JSON.stringify(nasaData))
-    setInterval(function() {
+    // map promisses
+    Promise.all(promises).then(function() {
+      fs.writeFile('data.json', JSON.stringify(nasaData))
       primus.write(nasaData);
-    }, 60000);
-  })
-
-});
+    })
+  });
+}, 60000);
 
 //Media
 function getMedia(event) {
