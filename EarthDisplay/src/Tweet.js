@@ -19,13 +19,17 @@ export default class Tweet extends THREE.Object3D {
 
     this.tweetBlocks = [];
 
+    var tweetBlockHolder = document.createElement("div");
+    tweetBlockHolder.className = ".tweetBlockHolder";
+    this.tweetEle.appendChild(tweetBlockHolder);
+
     for (var tweet of data.tweets) {
       var tweetBlockEle = document.createElement("div");
-      tweetBlockEle.className = "popupDisplay tweetBlock tweet";
-      tweetBlockEle.textContent = tweet.text;
-      tweetBlockEle.style.top = "0px";
+      tweetBlockEle.className = "popunderDisplay tweetBlock tweet";
+      tweetBlockEle.style.bottom = "0px";
       tweetBlockEle.style.left = "0px";
-      tweetEle.appendChild(tweetBlockEle);
+      tweetBlockEle.textContent = tweet.text;
+      tweetBlockHolder.appendChild(tweetBlockEle);
       this.tweetBlocks.push(tweetBlockEle);
     }
 
@@ -67,9 +71,19 @@ export default class Tweet extends THREE.Object3D {
       this.tweetEle.style.opacity = 1;
 
       this.hovering = true;
+      this.lastCurrent = -1;
+
+      for (var i in this.tweetBlocks) {
+        var tweetBlock = this.tweetBlocks[i];
+        $(tweetBlock).off('transitionend');
+      }
     });
 
     this.tweetEle.addEventListener('mouseleave', (e) => {
+      if (this.isGoing) {
+        return;
+      }
+
       var children = this.tweetEle.parentNode.childNodes;
       for (var i in children) {
         var child = children[i];
@@ -78,8 +92,22 @@ export default class Tweet extends THREE.Object3D {
         }
       }
 
+      for (var i in this.tweetBlocks) {
+        var tweetBlock = this.tweetBlocks[i];
+        // tweetBlock.style.display = 'none';
+        tweetBlock.style.bottom = 0 + "px";
+        tweetBlock.style.left = 0 + "px";
+        $(tweetBlock).one('transitionend', (function(e) {
+          this.style.display = 'none';
+        }).bind(tweetBlock));
+        console.log("OPACITYZERO");
+        tweetBlock.style.opacity = '0';
+      }
+
       this.hovering = false;
     });
+
+    this.hoverTime = 0;
 
     this.isGoing = false;
 
@@ -120,7 +148,7 @@ export default class Tweet extends THREE.Object3D {
     this.tweetEle.style.top = Math.floor(window.innerHeight-Math.floor((pos.y+1)/2*window.innerHeight)) + 'px';
     // this.tweetEle.style.opacity
 
-    var dist = camera.position.length();
+    var dist = camera.position.length()/2;
     var opacity = (dist-camera.position.distanceTo(pos3D))/dist;
     if (opacity < 0) {
       opacity = 0;
@@ -139,8 +167,60 @@ export default class Tweet extends THREE.Object3D {
 
     this.lookAt(new THREE.Vector3(0,0,0));
 
-    if (this.hover) {
-      
+    if (this.hovering || this.isGoing) {
+      if (this.tweetBlocks.length == 0) { return; }
+
+      // this.hoverTime += deltaTime;
+      // var current = Math.floor((this.hoverTime / 3000)) % Math.ceil(this.tweetBlocks.length);
+      var current = 0;
+      if (current != this.lastCurrent) {
+        for (var i in this.tweetBlocks) {
+          var tweetBlock = this.tweetBlocks[i];
+          if (i == current) {
+            var j = i;
+            console.log("hey" + j);
+            setTimeout((function() {
+              console.log(this);
+              this.style.bottom = -150 + "px";
+              this.style.left = 250 + "px";
+              this.style.width = "200px";
+              this.style.opacity = 1;
+              console.log(tweetBlock);
+            }).bind(tweetBlock), 10);
+            tweetBlock.style.display = 'block';
+          } else if (i == (current + 1)%this.tweetBlocks.length) {
+            var j = i;
+            console.log("hey" + j);
+            setTimeout((function() {
+              console.log(this);
+              this.style.bottom = -150 + "px";
+              this.style.left = 0 + "px";
+              this.style.width = "200px";
+              this.style.opacity = 1;
+              console.log(tweetBlock);
+            }).bind(tweetBlock), 10);
+            tweetBlock.style.display = 'block';
+          } else if (i == (current + 2)%this.tweetBlocks.length) {
+            var j = i;
+            console.log("hey" + j);
+            setTimeout((function() {
+              console.log(this);
+              this.style.bottom = -150 + "px";
+              this.style.left = -250 + "px";
+              this.style.width = "200px";
+              this.style.opacity = 1;
+              console.log(tweetBlock);
+            }).bind(tweetBlock), 10);
+            tweetBlock.style.display = 'block';
+          } else {
+            tweetBlock.style.bottom = -150 + "px";
+            tweetBlock.style.left = 0 + "px";
+            console.log("OPACITYZERO");
+            tweetBlock.style.opacity = 0;
+          }
+        }
+      }
+      this.lastCurrent = current;
     }
 
   }
