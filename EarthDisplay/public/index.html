@@ -12,14 +12,27 @@
     .popupDisplay {
       font-family: Helvetica;
       color: white;
-      box-shadow: 0px 0px 5px rgba(0,0,0,0.7);
-      background: rgba(0,0,0, 0.7);
-      border: 1px solid white;
+      box-shadow: 0px 0px 5px rgba(0,0,0,1);
+      background: rgba(0,0,0,1);
+      /*border: 1px solid white;*/
       position: absolute;
       display: block;
-      z-index: 1000;
-      border-radius: 6px;
+      z-index: 10;
+      border-radius: 10px;
+      border-top-left-radius: 0px;
       padding: 10px;
+
+      transition: opacity 0.2s;
+
+      /*transform: translate(-50%, -100%);*/
+      /*-webkit-transform: translate(-50%, -100%);*/
+    }
+
+    .popupDisplay:hover {
+      background: white;
+      color: black;
+      z-index: 100;
+      cursor: pointer;
     }
 
     html, body {

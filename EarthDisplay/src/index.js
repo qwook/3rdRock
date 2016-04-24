@@ -45,6 +45,9 @@ Promise.all([
   }
 
   var controls = new THREE.TrackballControls(camera);
+  controls.enablePan = false;
+  controls.minDistance = 12;
+  controls.maxDistance = 35;
 
   // Skybox
 
