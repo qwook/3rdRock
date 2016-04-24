@@ -22,15 +22,16 @@ function fixedEncodeURIComponent (str) {
   });
 }
 
+
 // Step 1: Get data from eonet
 new Promise(function(resolve, reject) {
 
-  var options = {
+  var nasaOptions = {
     host: 'eonet.sci.gsfc.nasa.gov',
     path: '/api/v2.1/events'
   };
 
-  http.request(options, function(response) {
+  http.request(nasaOptions, function(response) {
 
     var data;
     var str = "";
@@ -75,12 +76,13 @@ new Promise(function(resolve, reject) {
       link: eventURL,
       geometries: event.geometries, 
       twitter: [],
-      watson: []
+      watson: [],
+      alchemy: []
     }
     nasaData.events.push(newEvent);
 
     // Get all the tweets for each event
-    promises.push(getTweets(newEvent))
+    promises.push(getMedia(newEvent))
   })
 
   // map promisses
@@ -90,8 +92,8 @@ new Promise(function(resolve, reject) {
 
 });
 
-//Twitter
-function getTweets(event) {
+//Media
+function getMedia(event) {
   // Step 1: Get tweets based on the events
   return new Promise(function(resolve, reject) {
     client.get('search/tweets', {q: event.title}, function(error, tweets, response){
@@ -114,12 +116,14 @@ function getTweets(event) {
   // Step 2: Get watson data after the tweets are done
   }).then(function(twitterString) {
     return getWatsonData(event, twitterString);
+  }).then(function() {
+    return getAlchemyData(event);
   });
 }
 
-function getWatsonData (event, twitterString) {
+function getWatsonData(event, twitterString) {
   return new Promise(function(resolve, reject) {
-    var urlString = fixedEncodeURIComponent(twitterString)
+    var urlString = fixedEncodeURIComponent(twitterString);
     var command = spawn('curl', ['-u', "***REMOVED***", "https://gateway.watsonplatform.net/tone-analyzer-beta/api/v3/tone?version=2016-02-11&text="+urlString ]);
     var temp = '';
     command.stdout.on('data', (data) => {
@@ -133,3 +137,43 @@ function getWatsonData (event, twitterString) {
   });
 }
 
+function getWatsonData(event, twitterString) {
+  return new Promise(function(resolve, reject) {
+    var urlString = fixedEncodeURIComponent(twitterString);
+    var command = spawn('curl', ['-u', "***REMOVED***", "https://gateway.watsonplatform.net/tone-analyzer-beta/api/v3/tone?version=2016-02-11&text="+urlString ]);
+    var temp = '';
+    command.stdout.on('data', (data) => {
+      temp += data.toString()
+    });
+
+    command.on('close', (code) => {
+      event.watson.push(JSON.parse(temp));
+      resolve();
+    });
+  });
+}
+
+function getAlchemyData(event) {
+  return new Promise(function(resolve, reject) {
+    var string = fixedEncodeURIComponent(event.title);
+    var alchemyOptions = {
+      host: 'access.alchemyapi.com',
+      path: "/calls/data/GetNews?apikey=***REMOVED***&return=enriched.url.url,enriched.url.title&start=1460851200&end=1461538800&q.enriched.url.text="+string+"&count=25&outputMode=json"
+    };
+    http.request(alchemyOptions, function(response) {
+
+      var data;
+      var str = "";
+
+      response.on('data', function (chunk) {
+        str += chunk.toString();
+      });
+
+      response.on('end', function () {
+        data = JSON.parse(str)
+        event.alchemy.push(data)
+        resolve();
+      });
+    }).end();
+  })
+}
