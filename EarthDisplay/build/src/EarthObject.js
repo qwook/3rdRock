@@ -267,17 +267,23 @@ define(['exports', './Loaders.js', './Tweet.js'], function (exports, _Loaders, _
           for (var i in this.beacons) {
             mesh.push(this.beacons[i].beacon.mesh);
           }
+          mesh.push(this.globeMesh);
 
           var intersects = raycaster.intersectObjects(mesh);
 
-          if (intersects[0] != this.lastIntersect && this.lastIntersect) {
-            this.lastIntersect.object.parent.parent.stopHover();
-          };
+          if (intersects[0] && intersects[0].object != this.globeMesh) {
 
-          if (intersects[0] && intersects[0] != this.lastIntersect) {
-            intersects[0].object.parent.parent.startHover();
+            if (this.lastIntersect && intersects[0].object != this.lastIntersect.object) {
+              this.lastIntersect.object.parent.parent.stopHover();
+            };
+
+            if (intersects[0] && (!this.lastIntersect || intersects[0].object != this.lastIntersect.object)) {
+              intersects[0].object.parent.parent.startHover();
+            }
+            this.lastIntersect = intersects[0];
+          } else {
+            this.lastIntersect = null;
           }
-          this.lastIntersect = intersects[0];
         }
 
         this.cloudMesh.rotation.y += deltaTime / 10000;
