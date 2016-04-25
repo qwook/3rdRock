@@ -282,6 +282,9 @@ define(['exports', './Loaders.js', './Tweet.js'], function (exports, _Loaders, _
             }
             this.lastIntersect = intersects[0];
           } else {
+            if (this.lastIntersect) {
+              this.lastIntersect.object.parent.parent.stopHover();
+            }
             this.lastIntersect = null;
           }
         }
