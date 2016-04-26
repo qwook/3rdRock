@@ -8,6 +8,7 @@ app.use(express.static('bower_components'));
 app.use(express.static('build'));
 app.use(express.static('node_modules/react/dist'));
 app.use(express.static('node_modules/react-dom/dist'));
+app.use(express.static('node_modules/convnetjs/build'));
 
 app.get('/map/:x/:y', function(req, res) {
 
