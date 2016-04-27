@@ -116,7 +116,7 @@ define(['exports', './Loaders.js', './Tweet.js', './CategoryColors.js'], functio
       var currentClick = new Date().getTime();
 
       if (currentClick - lastClick < 250) {
-        earth.doubleClick();
+        earth.doubleClick(event);
       }
 
       lastClick = currentClick;
@@ -233,6 +233,7 @@ define(['exports', './Loaders.js', './Tweet.js', './CategoryColors.js'], functio
           if (_this.lastIntersect) {
             _this.lastIntersect.object.parent.parent.onClick();
           }
+          e.preventDefault();
         }
       });
 
@@ -296,7 +297,7 @@ define(['exports', './Loaders.js', './Tweet.js', './CategoryColors.js'], functio
       }
     }, {
       key: 'doubleClick',
-      value: function doubleClick() {
+      value: function doubleClick(event) {
 
         if (this.globeIntersect) {
           // camera.position.copy( lol );
@@ -317,6 +318,7 @@ define(['exports', './Loaders.js', './Tweet.js', './CategoryColors.js'], functio
 
           controls.enabled = false;
           // controls.locking = true;
+          event.preventDefault();
         }
       }
     }, {

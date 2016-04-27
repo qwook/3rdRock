@@ -42,6 +42,14 @@ class RightSide extends React.Component {
       return alchemy;
     }
 
+    getGoogle() {
+      try {
+        return this.state.google.items;
+      } catch(e) {
+        return [];
+      }
+    }
+
     render() {
         return <div className="container-fluid">
           <br />
@@ -70,15 +78,16 @@ class RightSide extends React.Component {
             }
           })()}
           <br />
-          <h5>Relevant Articles <small>(Powered by Alchemy)</small></h5>
+
+          <h5>Relevant Articles <small>(Powered by Google)</small></h5>
           <hr />
           {
-            this.getAlchemy().map((post)=>
-              <div key={post.id} className="panel panel-default"><a href={post.url}><div className="panel-body"><h6>{post.title}</h6></div></a></div>
+            this.getGoogle().map((post)=>
+              <div key={post.link} className="panel panel-default"><div className="panel-body"><h6><a href={post.link}><span dangerouslySetInnerHTML={{__html: post.htmlTitle}} /></a></h6><p><span dangerouslySetInnerHTML={{__html: post.htmlSnippet}} /></p></div></div>
             )
           }
           {(() => {
-            if (this.getAlchemy().length == 0) {
+            if (this.getGoogle().length == 0) {
               return <p>No articles found.</p>
             }
           })()}
