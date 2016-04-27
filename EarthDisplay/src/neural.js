@@ -125,7 +125,7 @@ Promise.all([
   var neuralLabels = [];
   var neuralDataToCompare = []; // clone of neuralData
 
-  var scale = 5;
+  var scale = 2;
 
   // Load in data
   var i = 0;
@@ -165,7 +165,7 @@ Promise.all([
       for (var i = 0; i < neuralDataToCompare.length; i++) {
         var pos = neuralDataToCompare[i];
         var dist = Math.sqrt(Math.pow(pos[0]-_x, 2) + Math.pow(pos[1]-_y, 2))
-        if (dist < 1) {
+        if (dist < 0.4) {
           continue xLoop;
         }
       }
@@ -173,57 +173,78 @@ Promise.all([
       neuralData.push([_x, _y]);
       neuralLabels.push(13); 
 
-      drawCircle(x/20 * width, y/20 * height, 5, 'rgb(0,0,0)');
+      drawCircle(x/20 * width, y/20 * height, 5, 'rgb(0,0,0)')
     }
   }
+
+  // // Fill in data for areas without points
+  // for (var y = 0; y < 20; y++) {
+  //   xLoop:
+  //   for (var x = 0; x < 20; x++) {
+  //     var _x = x/20*6 - 0.5;
+  //     var _y = y/20*6 - 0.5;
+
+  //     for (var i = 0; i < neuralDataToCompare.length; i++) {
+  //       var pos = neuralDataToCompare[i];
+  //       var dist = Math.sqrt(Math.pow(pos[0]-_x, 2) + Math.pow(pos[1]-_y, 2))
+  //       if (dist < 1) {
+  //         continue xLoop;
+  //       }
+  //     }
+
+  //     neuralData.push([_x, _y]);
+  //     neuralLabels.push(13); 
+
+  //     drawCircle(x/20 * width, y/20 * height, 5, 'rgb(0,0,0)');
+  //   }
+  // }
 
 
   // return;
 
-  setInterval(function() {
+  function yo() {
+    return Loaders.CacheJSON("./neuralNet.json")
+    .then(function(data) {
 
-    var neuralVolume = new convnetjs.Vol(1,1,neuralData.length);
+      neuralNet.fromJSON(data);
 
-    // incrementally train
-    for(var iters = 0; iters < 500; iters++) { // run this 500 times
-      for(var i = 0; i < neuralData.length; i++) {
-        neuralVolume.w = neuralData[i];
-        trainer.train(neuralVolume, neuralLabels[i]);
-      }
-    }
+      var netx = new convnetjs.Vol(1,1,neuralData.length);
 
-    var netx = new convnetjs.Vol(1,1,neuralData.length);
+      // draw neural network
+      for(var x=0; x<=width; x+= scale) {
+        for(var y=0; y<=height; y+= scale) {
+          netx.w[0] = x/width*6-0.5;
+          netx.w[1] = y/height*6-0.5;
+          var a = neuralNet.forward(netx, false);
 
-    // draw neural network
-    for(var x=0; x<=width; x+= scale) {
-      for(var y=0; y<=height; y+= scale) {
-        netx.w[0] = x/width*6-0.5;
-        netx.w[1] = y/height*6-0.5;
-        var a = neuralNet.forward(netx, false);
+          // go through weights and see which weight is highest
+          var curI = -1;
+          var curWeight = -1;
 
-        // go through weights and see which weight is highest
-        var curI = -1;
-        var curWeight = -1;
-
-        for (var j = 0; j < a.w.length; j++) {
-          var weight = a.w[j];
-          if (weight > curWeight) {
-            curWeight = weight;
-            curI = j;
+          for (var j = 0; j < a.w.length; j++) {
+            var weight = a.w[j];
+            if (weight > curWeight) {
+              curWeight = weight;
+              curI = j;
+            }
           }
+
+          var type = curI;
+
+          ctx.fillStyle = idToCategories[type].color;
+          ctx.fillRect(x, y, scale, scale);
         }
-
-        var type = curI;
-
-        ctx.fillStyle = idToCategories[type].color;
-        ctx.fillRect(x, y, scale, scale);
       }
-    }
 
-    for(var i = 0; i < neuralData.length; i++) {
-      drawCircle((neuralData[i][0]+0.5)/6*width, (neuralData[i][1]+0.5)/6*height, 5, idToCategories[neuralLabels[i]].color);
-    }
+      for(var i = 0; i < neuralData.length; i++) {
+        drawCircle((neuralData[i][0]+0.5)/6*width, (neuralData[i][1]+0.5)/6*height, 5, idToCategories[neuralLabels[i]].color);
+      }
 
-  }, 1);
+      setTimeout(() => yo(), 100);
+
+    });
+  }
+
+  yo();
 
 });

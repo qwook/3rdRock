@@ -29,6 +29,7 @@ Promise.all([
   Loaders.CacheTexture('images/Earth-clouds-1.png'),
   // Loaders.CacheTexture('images/yes.png'),
   Loaders.CacheTexture('images/edge_alpha.png'),
+  Loaders.CacheTexture('images/neural.png'),
 
   Loaders.CacheJSON('dataForHenry.json')
 ]).then(function() {
