@@ -5,72 +5,73 @@
 //fast by irene hoffman from the Noun Project
 //Falling Rocks by Daniele Catalanotto from the Noun Project
 //Iceberg by Juan Pablo Bravo from the Noun Project
+//Earthquake by Daniele Catalanotto from the Noun Project
 
 export var categories = {
     "Drought": { //
       id: 0,
       color: [255, 0, 0],
-      icon: 'icons/images/icons_13.png'
+      icon: 'icons/images/icons_17.png'
     },
     "Dust and Haze": { //
       id: 1,
       color: [100, 10, 10],
-      icon: 'icons/images/icons_15.png'
+      icon: 'icons/images/icons_19.png'
     },
     "Earthquakes": {
       id: 2,
       color: [10, 150, 10],
-      icon: 'icons/images/earthquake.png'
+      icon: 'icons/images/icons_29.png'
     },
     "Floods": { //
       id: 3,
       color: [10, 0, 255],
-      icon: 'icons/images/icons_05.png'
+      icon: 'icons/images/icons_09.png'
     },
     "Landslides": { //
       id: 4,
       color: [150, 150, 10],
-      icon: 'icons/images/ice.png'
+      icon: 'icons/images/icons_31.png'
     },
     "Manmade": {
       id: 5,
       color: [0, 0, 0],
-      icon: 'icons/images/manmade.png'
+      icon: 'icons/images/icons_19.png'
     },
     "Sea and Lake Ice": {
       id: 6,
       color: [225, 225, 255],
-      icon: 'icons/images/ice.png'
+      icon: 'icons/images/icons_03.png'
     },
     "Severe Storms": { //
       id: 7,
       color: [70, 70, 70],
-      icon: 'icons/images/icons_03.png'
+      icon: 'icons/images/icons_07.png'
     },
     "Snow": { //
       id: 8,
       color: [255, 255, 255],
-      icon: 'icons/images/icons_07.png'
+      icon: 'icons/images/icons_11.png'
     },
     "Temperature Extremes": { //
       id: 9,
       color: [10, 150, 10],
-      icon: 'icons/images/icons_26.png'
+      icon: 'icons/images/icons_33.png'
     },
     "Volcanoes": { //
       id: 10,
       color: [200, 0, 0],
-      icon: 'icons/images/icons_18.png'
+      icon: 'icons/images/icons_22.png'
     },
     "Water Color": { //
       id: 11,
       color: [0, 50, 200],
-      icon: 'icons/images/watercolor.png'
+      icon: 'icons/images/icons_35.png'
     },
     "Wildfires": { //
       id: 12,
       color: [255, 0, 0],
-      icon: 'icons/images/icons_20.png'
+      icon: 'icons/images/icons_24.png'
     },
     "None": {
       id: 13,
