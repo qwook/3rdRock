@@ -19,6 +19,7 @@
   "dependencies": {
     "bluebird": "^3.3.5",
     "express": "^4.13.4",
+    "google-search": "0.0.3",
     "hdb": "^0.5.5",
     "keyword-extractor": "0.0.12",
     "primus": "^5.1.0",
