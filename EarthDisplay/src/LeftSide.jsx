@@ -81,7 +81,7 @@ class LeftSide extends React.Component {
 
         try {ret.text = obv.phrase_32char;} catch(e){}
         try {ret.wind = obv.wdir;} catch(e){}
-        try {ret.temp = obv.metrics.feels_like;} catch(e){}
+        try {ret.temp = obv.metric.rh;} catch(e){}
 
         console.log(ret);
         return ret;

@@ -38,7 +38,7 @@ function onClick( event ) {
     var currentClick = (new Date()).getTime();
 
     if (currentClick - lastClick < 250) {
-      earth.doubleClick();
+      earth.doubleClick(event);
     }
 
     lastClick = currentClick;
@@ -181,6 +181,7 @@ export default class EarthObject extends THREE.Object3D {
         if (this.lastIntersect) {
           this.lastIntersect.object.parent.parent.onClick();
         }
+        e.preventDefault();
       }
     });
 
@@ -241,7 +242,7 @@ export default class EarthObject extends THREE.Object3D {
     this.beacons.push(tweet);
   }
 
-  doubleClick() {
+  doubleClick(event) {
 
     if (this.globeIntersect) {
         // camera.position.copy( lol );
@@ -262,6 +263,7 @@ export default class EarthObject extends THREE.Object3D {
 
         controls.enabled = false;
         // controls.locking = true;
+        event.preventDefault();
     }
   }
 

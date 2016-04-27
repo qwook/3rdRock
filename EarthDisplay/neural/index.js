@@ -7,9 +7,10 @@ var fs = require('fs');
 var width = 512;
 var height = 512;
 
+
 // var img = gd.createTrueColorSync(width, height);
 
-var iterations = 100000000;
+var iterations = 500;
 
 var categories = {
     "Drought": {
@@ -86,8 +87,8 @@ var neuralNet = new convnetjs.Net();
 
 var layer = [];
 layer.push({type:'input', out_sx:1, out_sy:1, out_depth:2});
-layer.push({type:'fc', num_neurons:6, activation: 'sigmoid'});
-layer.push({type:'fc', num_neurons:2, activation: 'sigmoid'});
+layer.push({type:'fc', num_neurons:13, activation: 'sigmoid'});
+layer.push({type:'fc', num_neurons:13, activation: 'sigmoid'});
 layer.push({type:'softmax', num_classes:idToCategories.length});
 
 neuralNet.makeLayers(layer);
@@ -99,158 +100,163 @@ var trainer = new convnetjs.SGDTrainer(neuralNet, {
   l2_decay: 0.001
 });
 
-var neuralData = [];
-var neuralLabels = [];
-var neuralDataToCompare = []; // clone of neuralData
 
-var scale = 5;
-
-// Load in data
-var i = 0;
-var data = JSON.parse(fs.readFileSync('public/dataForHenry.json', 'utf8'));
-for (var event of data.events) {
-  var coords;
-
-  if (event.geometries[0].type == "Point") {
-
-    coords = event.geometries[0].coordinates;
-  } else {
-    coords = event.geometries[0].coordinates[0][0];
+  if (fs.existsSync('neuralNet.json')) {
+    var data = JSON.parse(fs.readFileSync('neuralNet.json'));
+    neuralNet.fromJSON(data);
   }
 
-  var realPos2D = latLongToXY(coords[1], coords[0], width, height);
-  for (var r = 0; r < 5; r++) {
-    var pos2D = {
-      x: realPos2D.x + (Math.random()-0.5)*(width/10),
-      y: realPos2D.y + (Math.random()-0.5)*(height/10)
-    }
-    // drawCircle(pos2D.x, pos2D.y, 5, categories[event.category].color);
+  var data = JSON.parse(fs.readFileSync('public/dataForHenry.json', 'utf8'));
 
-    neuralData.push([pos2D.x/width*6 - 0.5, pos2D.y/height*6 - 0.5]);
-    neuralDataToCompare.push(neuralData[neuralData.length-1]);
-    neuralLabels.push(categories[event.category].id); 
+// process.on('SIGINT', function() {
+  if (process.argv[2] == "save") {
+    save();
+    return;
   }
-}
 
-// Fill in data for areas without points
-for (var y = 0; y < 20; y++) {
-  xLoop:
-  for (var x = 0; x < 20; x++) {
-    var _x = x/20*6 - 0.5;
-    var _y = y/20*6 - 0.5;
+  function save() {
+    console.log("Saving image...");
 
-    for (var i = 0; i < neuralDataToCompare.length; i++) {
-      var pos = neuralDataToCompare[i];
-      var dist = Math.sqrt(Math.pow(pos[0]-_x, 2) + Math.pow(pos[1]-_y, 2))
-      if (dist < 0.4) {
-        continue xLoop;
+    var png = new PNG({
+      filterType: 4,
+      width: width,
+      height: height
+    });
+
+    var netx = new convnetjs.Vol(1,1,data.events.length);
+    for (var x = 0; x < width; x++) {
+      for (var y = 0; y < height; y++) {
+        var idx = (width * y + x) << 2;
+
+        netx.w[0] = x/width*6-0.5;
+        netx.w[1] = y/height*6-0.5;
+        var a = neuralNet.forward(netx, false);
+
+        // go through weights and see which weight is highest
+        var curI = -1;
+        var curWeight = -1;
+
+        for (var j = 0; j < a.w.length; j++) {
+          var weight = a.w[j];
+          if (weight > curWeight) {
+            curWeight = weight;
+            curI = j;
+          }
+        }
+
+        var type = curI;
+
+        var color = idToCategories[type].color;
+
+        // invert color
+        png.data[idx] = color[0];
+        png.data[idx+1] = color[1];
+        png.data[idx+2] = color[2];
+
+        // and reduce opacity
+        png.data[idx+3] = 255;
+
+        // img.setPixel(x, y, idToCategories[type].color);
+
       }
     }
 
-    neuralData.push([_x, _y]);
-    neuralLabels.push(13); 
+    png.pack().pipe(fs.createWriteStream('out.png'));
 
-    // drawCircle(x/20 * width, y/20 * height, 5, [0,0,0)']
+    console.log(":-) Good Bye");
   }
-}
+
+
+for (var y = 0; y < 10000; y++) {
+
+  var neuralData = [];
+  var neuralLabels = [];
+  var neuralDataToCompare = []; // clone of neuralData
+
+  var scale = 5;
+
+  // Load in data
+  var i = 0;
+  for (var event of data.events) {
+    var coords;
+
+    if (event.geometries[0].type == "Point") {
+
+      coords = event.geometries[0].coordinates;
+    } else {
+      coords = event.geometries[0].coordinates[0][0];
+    }
+
+    var realPos2D = latLongToXY(coords[1], coords[0], width, height);
+    for (var r = 0; r < 5; r++) {
+      var pos2D = {
+        x: realPos2D.x + (Math.random()-0.5)*(width/10),
+        y: realPos2D.y + (Math.random()-0.5)*(height/10)
+      }
+      // drawCircle(pos2D.x, pos2D.y, 5, categories[event.category].color);
+
+      neuralData.push([pos2D.x/width*6 - 0.5, pos2D.y/height*6 - 0.5]);
+      neuralDataToCompare.push(neuralData[neuralData.length-1]);
+      neuralLabels.push(categories[event.category].id); 
+    }
+  }
+
+  // Fill in data for areas without points
+  for (var y = 0; y <= 10; y++) {
+    xLoop:
+    for (var x = 0; x <= 10; x++) {
+      var _x = x/10*6 - 0.5;
+      var _y = y/10*6 - 0.5;
+
+      for (var i = 0; i < neuralDataToCompare.length; i++) {
+        var pos = neuralDataToCompare[i];
+        var dist = Math.sqrt(Math.pow(pos[0]-_x, 2) + Math.pow(pos[1]-_y, 2))
+        if (dist < 0.4) {
+          continue xLoop;
+        }
+      }
+
+      neuralData.push([_x, _y]);
+      neuralLabels.push(13); 
+
+      // drawCircle(x/5 * width, y/5 * height, 5, [0,0,0)']
+    }
+  }
 
 
 // return;
 
 
 
-if (fs.existsSync('neuralNet.json')) {
-  var data = JSON.parse(fs.readFileSync('neuralNet.json'));
-  neuralNet.fromJSON(data);
-}
+    // process.exit(2);
 
+  // });
 
-// process.on('SIGINT', function() {
-if (process.argv[2] == "save") {
-  save();
-  return;
-}
+  var neuralVolume = new convnetjs.Vol(1,1,neuralData.length);
 
-function save() {
-  console.log("Saving image...");
-
-  var png = new PNG({
-    filterType: 4,
-    width: width,
-    height: height
-  });
-
-  var netx = new convnetjs.Vol(1,1,neuralData.length);
-  for (var x = 0; x < width; x++) {
-    for (var y = 0; y < height; y++) {
-      var idx = (width * y + x) << 2;
-
-      netx.w[0] = x/width*6-0.5;
-      netx.w[1] = y/height*6-0.5;
-      var a = neuralNet.forward(netx, false);
-
-      // go through weights and see which weight is highest
-      var curI = -1;
-      var curWeight = -1;
-
-      for (var j = 0; j < a.w.length; j++) {
-        var weight = a.w[j];
-        if (weight > curWeight) {
-          curWeight = weight;
-          curI = j;
-        }
-      }
-
-      var type = curI;
-
-      var color = idToCategories[type].color;
-
-      // invert color
-      png.data[idx] = color[0];
-      png.data[idx+1] = color[1];
-      png.data[idx+2] = color[2];
-
-      // and reduce opacity
-      png.data[idx+3] = 255;
-
-      // img.setPixel(x, y, idToCategories[type].color);
-
+  // incrementally train
+  for(var iters = 0; iters < iterations; iters++) { // run this 500 times
+    for(var i = 0; i < neuralData.length; i++) {
+      neuralVolume.w = neuralData[i];
+      trainer.train(neuralVolume, neuralLabels[i]);
     }
-  }
+    if (iters == Math.floor(iterations/4)) {
+      // console.log("25%");
+    }
+    if (iters == Math.floor(iterations/2)) {
+      // console.log("50%");
+    }
+    if (iters == Math.floor(iterations*3/4)) {
+      // console.log("75%");
+    }
 
-  png.pack().pipe(fs.createWriteStream('out.png'));
+    if (iterations % 100 == 0) {
+      fs.writeFileSync('neuralNet.json', JSON.stringify(neuralNet.toJSON()));
+    }
 
-  console.log(":-) Good Bye");
-}
-
-  // process.exit(2);
-
-// });
-
-var neuralVolume = new convnetjs.Vol(1,1,neuralData.length);
-
-// incrementally train
-for(var iters = 0; iters < iterations; iters++) { // run this 500 times
-  for(var i = 0; i < neuralData.length; i++) {
-    neuralVolume.w = neuralData[i];
-    trainer.train(neuralVolume, neuralLabels[i]);
-  }
-  if (iters == Math.floor(iterations/4)) {
-    console.log("25%");
-  }
-  if (iters == Math.floor(iterations/2)) {
-    console.log("50%");
-  }
-  if (iters == Math.floor(iterations*3/4)) {
-    console.log("75%");
-  }
-
-  if (iterations % 100 == 0) {
-    fs.writeFileSync('neuralNet.json', JSON.stringify(neuralNet.toJSON()));
-  }
-
-  if (iterations % 5000) {
-    console.log(iterations);
+    if (iterations % 5000) {
+      // console.log(iterations);
+    }
   }
 }
 

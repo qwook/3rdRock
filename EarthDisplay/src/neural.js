@@ -156,11 +156,11 @@ Promise.all([
   }
 
   // Fill in data for areas without points
-  for (var y = 0; y < 20; y++) {
+  for (var y = 0; y <= 10; y++) {
     xLoop:
-    for (var x = 0; x < 20; x++) {
-      var _x = x/20*6 - 0.5;
-      var _y = y/20*6 - 0.5;
+    for (var x = 0; x <= 10; x++) {
+      var _x = x/10*6 - 0.5;
+      var _y = y/10*6 - 0.5;
 
       for (var i = 0; i < neuralDataToCompare.length; i++) {
         var pos = neuralDataToCompare[i];
@@ -173,7 +173,7 @@ Promise.all([
       neuralData.push([_x, _y]);
       neuralLabels.push(13); 
 
-      drawCircle(x/20 * width, y/20 * height, 5, 'rgb(0,0,0)')
+      drawCircle(x/10 * width, y/10 * height, 5, 'rgb(0,0,0)')
     }
   }
 

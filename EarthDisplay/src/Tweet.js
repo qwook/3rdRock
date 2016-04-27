@@ -1,5 +1,6 @@
 
 import Beacon from './Beacon.js';
+import * as CategoryColors from './CategoryColors.js';
 
 const canvasWrapper = document.getElementById("canvasWrapper");
 
@@ -15,8 +16,17 @@ export default class Tweet extends THREE.Object3D {
     this.data = data;
 
     var tweetEle = document.createElement("div");
+
+    var tweetImg = document.createElement("img");
+    tweetImg.src = CategoryColors.categories[data.category].icon;
+    tweetImg.style.height = "32px";
+    tweetEle.appendChild(tweetImg);
+
+    var tweetTitle = document.createElement("span");
+    tweetTitle.textContent = data.title;
+    tweetEle.appendChild(tweetTitle);
+
     tweetEle.className = "popupDisplay tweet";
-    tweetEle.textContent = data.title;
     tweetEle.style.top = "0px";
     tweetEle.style.left = "0px";
     this.tweetEle = tweetEle;
