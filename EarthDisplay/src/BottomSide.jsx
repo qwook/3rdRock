@@ -17,8 +17,9 @@ class BottomSide extends React.Component {
   render() {
       return <div className="container-fluid">
         <div className="btn-group">
-          <a className={"btn " + this.is('standard')} onClick={() => this.clickStandard()}>Standard View</a>
-          <a className={"btn " + this.is('satellite')} onClick={() => this.clickSatellite()}>Satellite View</a>
+          <a className={"btn " + this.is('standard')} onClick={() => this.clickStandard()}>Standard</a>
+          <a className={"btn " + this.is('satellite')} onClick={() => this.clickSatellite()}>Satellite</a>
+          <a className={"btn " + this.is('neural')} onClick={() => this.clickNeural()}>Neural Net</a>
         </div>
         <div style={{'display': 'inlineBlock', 'float': 'right'}}>
           Powered by EONET
@@ -27,8 +28,6 @@ class BottomSide extends React.Component {
   }
 
   is(type) {
-    console.log(type);
-    console.log(this.state);
     if (type == this.state.current) {
       return 'btn-primary';
     } else {
@@ -48,8 +47,13 @@ class BottomSide extends React.Component {
     this.setState({
       current: "satellite"
     });
-    console.log("satellite");
-    console.log(this.state);
+  }
+
+  clickNeural() {
+    earth.current = "neural";
+    this.setState({
+      current: "neural"
+    });
   }
 }
 

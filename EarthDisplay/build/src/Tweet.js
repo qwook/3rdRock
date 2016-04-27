@@ -127,6 +127,12 @@ define(["exports", "./Beacon.js"], function (exports, _Beacon) {
     _createClass(Tweet, [{
       key: "startHover",
       value: function startHover() {
+        if (earth.showingInfo) {
+          return;
+        }
+
+        earth.hovering = true;
+
         var children = this.tweetEle.parentNode.childNodes;
         for (var i in children) {
           var child = children[i];
@@ -143,6 +149,12 @@ define(["exports", "./Beacon.js"], function (exports, _Beacon) {
     }, {
       key: "stopHover",
       value: function stopHover() {
+        if (earth.showingInfo) {
+          return;
+        }
+
+        earth.hovering = false;
+
         var children = this.tweetEle.parentNode.childNodes;
         for (var i in children) {
           var child = children[i];
@@ -163,6 +175,18 @@ define(["exports", "./Beacon.js"], function (exports, _Beacon) {
         rightSide.scrollTop = 0;
         biggieSmalls.scrollTop = 0;
 
+        var children = this.tweetEle.parentNode.childNodes;
+        for (var i in children) {
+          var child = children[i];
+          if (child.classList && child.classList.contains && child.classList.contains("popupDisplay") > 0) {
+            child.overrideOpacity = true;
+            child.style.opacity = 0.11;
+          }
+        }
+        this.tweetEle.overrideOpacity = true;
+        this.tweetEle.style.opacity = 1;
+        this.beacon.mesh.material.opacity = 1;
+
         var lol = new THREE.Vector3(0, 0, 0);
         this.localToWorld(lol);
         // camera.position.copy( lol );
@@ -171,6 +195,7 @@ define(["exports", "./Beacon.js"], function (exports, _Beacon) {
         this.isGoing = true;
         controls.enabled = false;
         controls.locking = true;
+        earth.showingInfo = this;
 
         events.dispatchEvent({ type: 'changeFocus', data: this.data });
       }
