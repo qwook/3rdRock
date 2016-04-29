@@ -10,6 +10,7 @@ var express = require('express');
 var Primus = require('primus');
 var GoogleSearch = require('google-search');
 var keys = require('./keys.js');
+var googleImages = require('google-images');
 
 var app = express();
 app.use('/', express.static(__dirname + '/public'));
@@ -24,6 +25,8 @@ var client = new Twitter({
   access_token_key: keys.twitter.access_token_key,
   access_token_secret: keys.twitter.access_token_secret
 });
+
+var googleImageSearch = googleImages(keys.google.cx, keys.google.key);
 
 var googleSearch = new GoogleSearch({
   key: keys.google.key,
@@ -55,7 +58,6 @@ function fixedEncodeURIComponent (str) {
       var str = "";
 
       response.on('data', function (chunk) {
-        console.log(";-)")
         str += chunk.toString();
       });
 
@@ -66,11 +68,8 @@ function fixedEncodeURIComponent (str) {
 
     }).end();
 
-    console.log('sup');
-
   // Step 2: Get twitter data for each event
   }).then(function(data) {
-    console.log('NEW EVENT')
 
     // array of promises
     var promises = [];
@@ -106,7 +105,7 @@ function fixedEncodeURIComponent (str) {
         link: eventURL,
         geometries: event.geometries, 
         twitter: [],
-        watson: [],
+        watson: []
       }
 
       nasaData.events.push(newEvent);
@@ -129,7 +128,6 @@ function getMedia(event) {
     title = title.toLowerCase().replace(area.toLowerCase(),'')
   })
   return new Promise(function(resolve, reject) {
-    console.log('getting tweets')
     client.get('search/tweets', {q: title}, function(error, tweets, response){
       var twitterString = '';
       var mediaUrl = ''
@@ -155,14 +153,13 @@ function getMedia(event) {
     }); 
   // Step 2: Get watson data after the tweets are done
   }).then(function(twitterString) {
-    console.log('getting text analysis')
     return getWatsonData(event, twitterString);
   }).then(function() {
-    console.log('getting weather')
     return getWeatherData(event);
   }).then(function() {
-    console.log('getting news')
     return getGoogleData(event)
+  }).then(function() {
+    return getGoogleImages(event)
   });
 }
 
@@ -255,5 +252,15 @@ function getGoogleData(event) {
         resolve();
       });
     }).end();
+  })
+}
+
+function getGoogleImages(event) {
+  return new Promise(function(resolve,reject) {
+    googleImageSearch.search(event.title)
+      .then(function (images) {
+        event.images = images;
+        resolve();
+    });
   })
 }
