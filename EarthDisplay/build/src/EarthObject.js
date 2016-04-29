@@ -148,27 +148,27 @@ define(['exports', './Loaders.js', './Tweet.js', './CurrentLocation.js', './Cate
 
       // Loaders.Texture('images/elev_bump_4k.jpg').generateMipmaps = true;
 
-      Promise.all([Loaders.CacheTexture('/map/0/0.jpeg'), Loaders.CacheTexture('/map/1/0.jpeg'), Loaders.CacheTexture('/map/1/1.jpeg'), Loaders.CacheTexture('/map/0/1.jpeg')]).then(function (texture) {
+      Promise.all([Loaders.CacheTexture('map/0/0.jpeg'), Loaders.CacheTexture('map/1/0.jpeg'), Loaders.CacheTexture('map/1/1.jpeg'), Loaders.CacheTexture('map/0/1.jpeg')]).then(function (texture) {
 
-        global.TwoDplane.material.map = Loaders.Texture('/map/0/0.jpeg');
+        global.TwoDplane.material.map = Loaders.Texture('map/0/0.jpeg');
         global.TwoDplane.scale.x = 0.5;
         global.TwoDplane.scale.y = 0.5;
         global.TwoDplane.position.x = -0.5;
         global.TwoDplane.position.y = 0.5;
 
-        global.TwoDplane1.material.map = Loaders.Texture('/map/1/0.jpeg');
+        global.TwoDplane1.material.map = Loaders.Texture('map/1/0.jpeg');
         global.TwoDplane1.scale.x = 0.5;
         global.TwoDplane1.scale.y = 0.5;
         global.TwoDplane1.position.x = -0.5;
         global.TwoDplane1.position.y = -0.5;
 
-        global.TwoDplane2.material.map = Loaders.Texture('/map/0/1.jpeg');
+        global.TwoDplane2.material.map = Loaders.Texture('map/0/1.jpeg');
         global.TwoDplane2.scale.x = 0.5;
         global.TwoDplane2.scale.y = 0.5;
         global.TwoDplane2.position.x = 0.5;
         global.TwoDplane2.position.y = 0.5;
 
-        global.TwoDplane3.material.map = Loaders.Texture('/map/1/1.jpeg');
+        global.TwoDplane3.material.map = Loaders.Texture('map/1/1.jpeg');
         global.TwoDplane3.scale.x = 0.5;
         global.TwoDplane3.scale.y = 0.5;
         global.TwoDplane3.position.x = 0.5;
