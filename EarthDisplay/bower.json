@@ -1,0 +1,22 @@
+{
+  "name": "earthdisplay",
+  "description": "",
+  "main": "index.js",
+  "license": "MIT",
+  "homepage": "https://github.com/qwook/3rdRock",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "three.js": "threejs#*",
+    "requirejs": "^2.2.0",
+    "bluebird": "^3.3.5",
+    "jquery": "^2.2.3",
+    "autolink": "^1.0.1"
+  }
+}
