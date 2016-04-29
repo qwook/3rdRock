@@ -1,0 +1,115 @@
+[
+  {
+    "name": "north_america",
+    "topLeft": {
+      "latitude": 68.1190256,
+      "longitude": -161.7814533
+    },
+    "bottomRight": {
+      "latitude": 20.2510512,
+      "longitude": -20.9736823
+    }
+  },
+  {
+    "name": "south_america",
+    "topLeft": {
+      "latitude": 20.2510512,
+      "longitude": -161.7814533
+    },
+    "bottomRight": {
+      "latitude": -58.1953123,
+      "longitude": -20.9736823
+    }
+  },
+  {
+    "name": "europe",
+    "topLeft": {
+      "latitude": 69.4650333,
+      "longitude": -20.9736823
+    },
+    "bottomRight": {
+      "latitude": 34.1112252,
+      "longitude": 35.2831457
+    }
+  },
+  {
+    "name": "africa",
+    "topLeft": {
+      "latitude": 34.1112252,
+      "longitude": -20.9736823
+    },
+    "bottomRight": {
+      "latitude": -43.4685458,
+      "longitude": 35.2831457
+    }
+  },
+  {
+    "name": "middle_east",
+    "topLeft": {
+      "latitude": 49.9946367,
+      "longitude": 35.2831457
+    },
+    "bottomRight": {
+      "latitude": 8.2233431,
+      "longitude": 73.7338807
+    }
+  },
+  {
+    "name": "asia",
+    "topLeft": {
+      "latitude": 49.9946367,
+      "longitude": 73.7338807
+    },
+    "bottomRight": {
+      "latitude": 22.104181,
+      "longitude": 123.567515
+    }
+  },
+  {
+    "name": "south_asia",
+    "topLeft": {
+      "latitude": 22.104181,
+      "longitude": 73.7338807
+    },
+    "bottomRight": {
+      "latitude": -9.558625,
+      "longitude": 177.754356
+    }
+  },
+  {
+    "name": "russia",
+    "topLeft": {
+      "latitude": 80.375985,
+      "longitude": 35.2831457
+    },
+    "bottomRight": {
+      "latitude": 49.9946367,
+      "longitude": 177.754356
+    }
+  },
+  {
+    "name": "far_east",
+    "topLeft": {
+      "latitude": 49.9946367,
+      "longitude": 123.567515
+    },
+    "bottomRight": {
+      "latitude": 22.104181,
+      "longitude": 177.754356
+    }
+  },
+  {
+    "name": "australia",
+    "topLeft": {
+      "latitude": 22.104181,
+      "longitude": 73.7338807
+    },
+    "bottomRight": {
+      "latitude": -62.296902,
+      "longitude": 177.754356
+    }
+  }
+
+
+
+]

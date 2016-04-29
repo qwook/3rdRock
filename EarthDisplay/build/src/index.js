@@ -43,7 +43,7 @@ define(['./src/Loaders.js', './src/EarthObject.js', './src/BottomSide.js', './sr
 
   Promise.all([Loaders.CacheTexture('images/2_no_clouds_4k.jpg'),
   // Loaders.CacheTexture('images/elev_bump_4k.jpg'),
-  Loaders.CacheTexture('images/water_4k.png'), Loaders.CacheTexture('images/skybox.jpg'), Loaders.CacheTexture('images/hemisphere.png'), Loaders.CacheTexture('images/beacon.png'), Loaders.CacheTexture('images/earthbump.png'),
+  Loaders.CacheTexture('images/water_4k.png'), Loaders.CacheTexture('images/skybox.jpg'), Loaders.CacheTexture('images/hemisphere.png'), Loaders.CacheTexture('images/current_location.png'), Loaders.CacheTexture('images/beacon.png'), Loaders.CacheTexture('images/earthbump.png'),
   // Loaders.CacheTexture('images/earth_normal.png'),
   // Loaders.CacheTexture('images/earth_lights_lrg.jpg'),
   // Loaders.CacheTexture('images/World-satellite map.png'),

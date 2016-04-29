@@ -21,6 +21,7 @@ Promise.all([
   Loaders.CacheTexture('images/water_4k.png'),
   Loaders.CacheTexture('images/skybox.jpg'),
   Loaders.CacheTexture('images/hemisphere.png'),
+  Loaders.CacheTexture('images/current_location.png'),
   Loaders.CacheTexture('images/beacon.png'),
   Loaders.CacheTexture('images/earthbump.png'),
   // Loaders.CacheTexture('images/earth_normal.png'),

@@ -1,6 +1,7 @@
 
 import * as Loaders from './Loaders.js';
 import Tweet from './Tweet.js';
+import CurrentLocation from './CurrentLocation.js';
 import * as CategoryColors from './CategoryColors.js';
 
 var raycaster = new THREE.Raycaster();
@@ -222,6 +223,16 @@ export default class EarthObject extends THREE.Object3D {
       }
     });
 
+    navigator.geolocation.getCurrentPosition((geo) => {
+      var currentLocation = new CurrentLocation;
+
+      currentLocation.position.copy(this.latLongAltToPoint(geo.coords.latitude, geo.coords.longitude, 10));
+      this.add(currentLocation);
+      console.log(geo.coords);
+
+      this.currentLocation = currentLocation;
+    });
+
   }
 
   addEvent(event) {
@@ -321,6 +332,10 @@ export default class EarthObject extends THREE.Object3D {
       }
       mesh.push(this.globeMesh);
 
+      if (this.currentLocation) {
+        mesh.push(this.currentLocation.beacon.mesh);
+      }
+
       var olVis = this.globeMesh.visible;
       this.globeMesh.visible = true;
       var intersects = raycaster.intersectObjects( mesh );
@@ -362,7 +377,7 @@ export default class EarthObject extends THREE.Object3D {
           }
 
           // Display data about where the user is hovering
-          var pos2D = this.latLongToXY(coords.lat, coords.long, 512, 512);
+          var pos2D = this.latLongToXY(coords.lat, coords.long, 1026, 1026);
           var pixelData = this.neuralCanvas.getContext('2d').getImageData(pos2D.x, pos2D.y, 1, 1).data;
 
           var category = CategoryColors.getCategoryFromColor(pixelData[0], pixelData[1], pixelData[2]);
