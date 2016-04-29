@@ -129,11 +129,12 @@ Promise.all([
   var neuralLabels = [];
   var neuralDataToCompare = []; // clone of neuralData
 
-  var scale = 2;
+  var scale = 5;
 
   // Load in data
   var i = 0;
   var data = Loaders.getJSON('events.json');
+  console.log(data.length);
   for (var event of data) {
     // var coords;
 

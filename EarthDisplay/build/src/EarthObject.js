@@ -1,4 +1,4 @@
-define(['exports', './Loaders.js', './Tweet.js', './CategoryColors.js'], function (exports, _Loaders, _Tweet, _CategoryColors) {
+define(['exports', './Loaders.js', './Tweet.js', './CurrentLocation.js', './CategoryColors.js'], function (exports, _Loaders, _Tweet, _CurrentLocation, _CategoryColors) {
   'use strict';
 
   Object.defineProperty(exports, "__esModule", {
@@ -8,6 +8,8 @@ define(['exports', './Loaders.js', './Tweet.js', './CategoryColors.js'], functio
   var Loaders = _interopRequireWildcard(_Loaders);
 
   var _Tweet2 = _interopRequireDefault(_Tweet);
+
+  var _CurrentLocation2 = _interopRequireDefault(_CurrentLocation);
 
   var CategoryColors = _interopRequireWildcard(_CategoryColors);
 
@@ -273,6 +275,16 @@ define(['exports', './Loaders.js', './Tweet.js', './CategoryColors.js'], functio
         }
       });
 
+      navigator.geolocation.getCurrentPosition(function (geo) {
+        var currentLocation = new _CurrentLocation2.default();
+
+        currentLocation.position.copy(_this.latLongAltToPoint(geo.coords.latitude, geo.coords.longitude, 10));
+        _this.add(currentLocation);
+        console.log(geo.coords);
+
+        _this.currentLocation = currentLocation;
+      });
+
       return _this;
     }
 
@@ -376,6 +388,10 @@ define(['exports', './Loaders.js', './Tweet.js', './CategoryColors.js'], functio
           }
           mesh.push(this.globeMesh);
 
+          if (this.currentLocation) {
+            mesh.push(this.currentLocation.beacon.mesh);
+          }
+
           var olVis = this.globeMesh.visible;
           this.globeMesh.visible = true;
           var intersects = raycaster.intersectObjects(mesh);
@@ -416,7 +432,7 @@ define(['exports', './Loaders.js', './Tweet.js', './CategoryColors.js'], functio
               }
 
               // Display data about where the user is hovering
-              var pos2D = this.latLongToXY(coords.lat, coords.long, 512, 512);
+              var pos2D = this.latLongToXY(coords.lat, coords.long, 1026, 1026);
               var pixelData = this.neuralCanvas.getContext('2d').getImageData(pos2D.x, pos2D.y, 1, 1).data;
 
               var category = CategoryColors.getCategoryFromColor(pixelData[0], pixelData[1], pixelData[2]);

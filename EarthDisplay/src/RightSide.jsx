@@ -50,49 +50,66 @@ class RightSide extends React.Component {
       }
     }
 
+    onCurrentLocation() {
+      if (this.state.twitter == null && this.state.currentLocation) {
+        return true;
+      }
+
+      return false;
+    }
+
     render() {
-        return <div className="container-fluid">
-          <br />
-          <h5>Twitter</h5>
-          <hr/>
-          {
-            this.getTweets().map((tweet) =>
-              <div className="panel panel-default" key={tweet.created+tweet.sceenName}>
-                <div className="panel-body">
-                  <h6><img src={tweet.userPicture} width="25px;" />&nbsp;&nbsp;{tweet.name}</h6>
-                  <span dangerouslySetInnerHTML={{__html: tweet.text.autoLink()}} />
-                  {(() => {
-                    console.log(tweet);
-                    if (tweet.media) {
-                      return <div><hr/><img src={tweet.media} style={{"maxWidth": "100%"}} /></div>;
-                    }
-                  })()}
-                </div>
-              </div>
-            )
+      return <div className="container-fluid">
+        {(()=> {
+          if (!this.onCurrentLocation()) {
+            return <div>
+              <br />
+              <h5>Twitter</h5>
+              <hr/>
+              {
+                this.getTweets().map((tweet) =>
+                  <div className="panel panel-default" key={tweet.created+tweet.sceenName}>
+                    <div className="panel-body">
+                      <h6><img src={tweet.userPicture} width="25px;" />&nbsp;&nbsp;{tweet.name}</h6>
+                      <span dangerouslySetInnerHTML={{__html: tweet.text.autoLink()}} />
+                      {(() => {
+                        console.log(tweet);
+                        if (tweet.media) {
+                          return <div><hr/><img src={tweet.media} style={{"maxWidth": "100%"}} /></div>;
+                        }
+                      })()}
+                    </div>
+                  </div>
+                )
+              }
+
+              {(() => {
+                if (this.state.twitter.length == 0) {
+                  return <p>No tweets found.</p>
+                }
+              })()}
+              <br />
+
+              <h5>Relevant Articles <small>(Powered by Google)</small></h5>
+              <hr />
+              {
+                this.getGoogle().map((post)=>
+                  <div key={post.link} className="panel panel-default"><div className="panel-body"><h6><a href={post.link}><span dangerouslySetInnerHTML={{__html: post.htmlTitle}} /></a></h6><p><span dangerouslySetInnerHTML={{__html: post.htmlSnippet}} /></p></div></div>
+                )
+              }
+              {(() => {
+                if (this.getGoogle().length == 0) {
+                  return <p>No articles found.</p>
+                }
+              })()}
+            </div>
+          } else {
+            return <div>
+            </div>
           }
+        })()}
 
-          {(() => {
-            if (this.state.twitter.length == 0) {
-              return <p>No tweets found.</p>
-            }
-          })()}
-          <br />
-
-          <h5>Relevant Articles <small>(Powered by Google)</small></h5>
-          <hr />
-          {
-            this.getGoogle().map((post)=>
-              <div key={post.link} className="panel panel-default"><div className="panel-body"><h6><a href={post.link}><span dangerouslySetInnerHTML={{__html: post.htmlTitle}} /></a></h6><p><span dangerouslySetInnerHTML={{__html: post.htmlSnippet}} /></p></div></div>
-            )
-          }
-          {(() => {
-            if (this.getGoogle().length == 0) {
-              return <p>No articles found.</p>
-            }
-          })()}
-
-        </div>;
+      </div>;
     }
 }
 
