@@ -8,6 +8,8 @@ import BottomSide from "./src/BottomSide.js";
 import RightSide from "./src/RightSide.js";
 import LeftSide from "./src/LeftSide.js";
 
+import CustomTrackballControls from "./src/CustomTrackballControls.js";
+
 global.events = new THREE.EventDispatcher();
 
 // Load up react
@@ -21,6 +23,7 @@ Promise.all([
   Loaders.CacheTexture('images/water_4k.png'),
   Loaders.CacheTexture('images/skybox.jpg'),
   Loaders.CacheTexture('images/hemisphere.png'),
+  Loaders.CacheTexture('images/current_location.png'),
   Loaders.CacheTexture('images/beacon.png'),
   Loaders.CacheTexture('images/earthbump.png'),
   // Loaders.CacheTexture('images/earth_normal.png'),
@@ -64,7 +67,7 @@ Promise.all([
     return vector.clone().project(camera);
   }
 
-  var controls = new THREE.TrackballControls(camera, document.getElementById("canvasWrapper"));
+  var controls = new CustomTrackballControls(camera, document.getElementById("canvasWrapper"));
   controls.noPan = true;
   controls.minDistance = 12;
   controls.maxDistance = 35;

@@ -1,6 +1,7 @@
 
 import * as Loaders from './Loaders.js';
 import Tweet from './Tweet.js';
+import CurrentLocation from './CurrentLocation.js';
 import * as CategoryColors from './CategoryColors.js';
 
 var raycaster = new THREE.Raycaster();
@@ -45,6 +46,18 @@ function onClick( event ) {
   }
 }
 
+var lastMouseDown = 0;
+document.getElementById("earth").addEventListener( 'mousedown', function() {
+  lastMouseDown = (new Date()).getTime();
+});
+
+document.body.addEventListener( 'mouseup', function(event) {
+  var currentClick = (new Date()).getTime();
+
+  if (currentClick - lastMouseDown < 200) {
+    earth.tap(event);
+  }
+}, false );
 
 export default class EarthObject extends THREE.Object3D {
   constructor() {
@@ -54,31 +67,31 @@ export default class EarthObject extends THREE.Object3D {
     // Loaders.Texture('images/elev_bump_4k.jpg').generateMipmaps = true;
 
     Promise.all([
-      Loaders.CacheTexture('/map/0/0'),
-      Loaders.CacheTexture('/map/1/0'),
-      Loaders.CacheTexture('/map/1/1'),
-      Loaders.CacheTexture('/map/0/1'),
+      Loaders.CacheTexture('/map/0/0.jpeg'),
+      Loaders.CacheTexture('/map/1/0.jpeg'),
+      Loaders.CacheTexture('/map/1/1.jpeg'),
+      Loaders.CacheTexture('/map/0/1.jpeg'),
     ]).then((texture) => {
 
-      global.TwoDplane.material.map = Loaders.Texture('/map/0/0');
+      global.TwoDplane.material.map = Loaders.Texture('/map/0/0.jpeg');
       global.TwoDplane.scale.x = 0.5;
       global.TwoDplane.scale.y = 0.5;
       global.TwoDplane.position.x = -0.5;
       global.TwoDplane.position.y = 0.5;
 
-      global.TwoDplane1.material.map = Loaders.Texture('/map/1/0');
+      global.TwoDplane1.material.map = Loaders.Texture('/map/1/0.jpeg');
       global.TwoDplane1.scale.x = 0.5;
       global.TwoDplane1.scale.y = 0.5;
       global.TwoDplane1.position.x = -0.5;
       global.TwoDplane1.position.y = -0.5;
 
-      global.TwoDplane2.material.map = Loaders.Texture('/map/0/1');
+      global.TwoDplane2.material.map = Loaders.Texture('/map/0/1.jpeg');
       global.TwoDplane2.scale.x = 0.5;
       global.TwoDplane2.scale.y = 0.5;
       global.TwoDplane2.position.x = 0.5;
       global.TwoDplane2.position.y = 0.5;
 
-      global.TwoDplane3.material.map = Loaders.Texture('/map/1/1');
+      global.TwoDplane3.material.map = Loaders.Texture('/map/1/1.jpeg');
       global.TwoDplane3.scale.x = 0.5;
       global.TwoDplane3.scale.y = 0.5;
       global.TwoDplane3.position.x = 0.5;
@@ -173,17 +186,19 @@ export default class EarthObject extends THREE.Object3D {
     this.cloudMesh.rotation.x = Math.PI/2;
     this.beacons = [];
     this.current = "standard";
+    this.currentCat = "None";
 
     // todo: destroy these event listeners...
 
-    window.addEventListener( 'click', (e) => {
-      if (e.target.id == "earth") {
-        if (this.lastIntersect) {
-          this.lastIntersect.object.parent.parent.onClick();
-        }
-        e.preventDefault();
-      }
-    });
+    // window.addEventListener( 'click', (e) => {
+    //   if (e.target.id == "earth") {
+    //     if (this.lastIntersect) {
+    //       this.lastIntersect.object.parent.parent.onClick();
+    //     }
+
+    //     e.preventDefault();
+    //   }
+    // });
 
     controls.addEventListener('change', () => {
       if (controls.locking) {
@@ -222,6 +237,16 @@ export default class EarthObject extends THREE.Object3D {
       }
     });
 
+    navigator.geolocation.getCurrentPosition((geo) => {
+      var currentLocation = new CurrentLocation({lat: geo.coords.latitude, long: geo.coords.longitude});
+
+      currentLocation.position.copy(this.latLongAltToPoint(geo.coords.latitude, geo.coords.longitude, 10));
+      this.add(currentLocation);
+      console.log(geo.coords);
+
+      this.currentLocation = currentLocation;
+    });
+
   }
 
   addEvent(event) {
@@ -240,6 +265,29 @@ export default class EarthObject extends THREE.Object3D {
     this.add(tweet);
 
     this.beacons.push(tweet);
+  }
+
+  tap(event) {
+
+    if (event.target.id == "earth") {
+      if (this.lastIntersect) {
+        this.lastIntersect.object.parent.parent.onClick();
+        controls.forceOut();
+      }
+    }
+
+    if (this.globeIntersect) {
+      console.log(this.current);
+      if (this.current == "neural") {
+        // leftSide.className = "";
+        rightSide.className = "";
+        biggieSmalls.className = "";
+        // leftSide.scrollTop = 0;
+        rightSide.scrollTop = 0;
+        biggieSmalls.scrollTop = 0;
+        events.dispatchEvent({type: 'changeFocus', data: {twitter: null, currentLocation: this.currentCat, current: false}});
+      }
+    }
   }
 
   doubleClick(event) {
@@ -265,6 +313,13 @@ export default class EarthObject extends THREE.Object3D {
         // controls.locking = true;
         event.preventDefault();
     }
+  }
+
+  categoryFromLatLong(lat, long) {
+    var pos2D = this.latLongToXY(lat, long, 1026, 1026);
+    var pixelData = this.neuralCanvas.getContext('2d').getImageData(Math.floor(pos2D.x), Math.floor(pos2D.y), 1, 1).data;
+
+    return CategoryColors.getCategoryFromColor(pixelData[0], pixelData[1], pixelData[2]);
   }
 
   update() {
@@ -307,6 +362,16 @@ export default class EarthObject extends THREE.Object3D {
       this.neuralMesh.visible = false;
     }
 
+    if (this.current == "neural") {
+      for (var beacon of this.beacons) {
+        beacon.visible = false;
+      }
+    } else {
+      for (var beacon of this.beacons) {
+        beacon.visible = true;
+      }
+    }
+
     raycaster.setFromCamera( mouse, camera ); 
 
     if (this.hovering) {
@@ -316,10 +381,18 @@ export default class EarthObject extends THREE.Object3D {
     if (onCanvas) {
       // calculate objects intersecting the picking ray
       var mesh = [];
-      for (var i in this.beacons) {
-        mesh.push(this.beacons[i].beacon.mesh);
+
+      if (this.current != "neural") {
+        for (var i in this.beacons) {
+          mesh.push(this.beacons[i].beacon.mesh);
+        }
       }
+
       mesh.push(this.globeMesh);
+
+      if (this.currentLocation) {
+        mesh.push(this.currentLocation.beacon.mesh);
+      }
 
       var olVis = this.globeMesh.visible;
       this.globeMesh.visible = true;
@@ -362,12 +435,13 @@ export default class EarthObject extends THREE.Object3D {
           }
 
           // Display data about where the user is hovering
-          var pos2D = this.latLongToXY(coords.lat, coords.long, 512, 512);
+          var pos2D = this.latLongToXY(coords.lat, coords.long, 1026, 1026);
           var pixelData = this.neuralCanvas.getContext('2d').getImageData(pos2D.x, pos2D.y, 1, 1).data;
 
           var category = CategoryColors.getCategoryFromColor(pixelData[0], pixelData[1], pixelData[2]);
           misterWorldWide.textContent = category;
           misterWorldWide.style.display = 'inline-block';
+          this.currentCat = category;
 
         } else {
           misterWorldWide.style.display = 'none';

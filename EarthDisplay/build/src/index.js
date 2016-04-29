@@ -1,4 +1,4 @@
-define(['./src/Loaders.js', './src/EarthObject.js', './src/BottomSide.js', './src/RightSide.js', './src/LeftSide.js', './src/ImageLoader_Overwrite.js'], function (_Loaders, _EarthObject, _BottomSide, _RightSide, _LeftSide) {
+define(['./src/Loaders.js', './src/EarthObject.js', './src/BottomSide.js', './src/RightSide.js', './src/LeftSide.js', './src/CustomTrackballControls.js', './src/ImageLoader_Overwrite.js'], function (_Loaders, _EarthObject, _BottomSide, _RightSide, _LeftSide, _CustomTrackballControls) {
   'use strict';
 
   var Loaders = _interopRequireWildcard(_Loaders);
@@ -10,6 +10,8 @@ define(['./src/Loaders.js', './src/EarthObject.js', './src/BottomSide.js', './sr
   var _RightSide2 = _interopRequireDefault(_RightSide);
 
   var _LeftSide2 = _interopRequireDefault(_LeftSide);
+
+  var _CustomTrackballControls2 = _interopRequireDefault(_CustomTrackballControls);
 
   function _interopRequireDefault(obj) {
     return obj && obj.__esModule ? obj : {
@@ -43,7 +45,7 @@ define(['./src/Loaders.js', './src/EarthObject.js', './src/BottomSide.js', './sr
 
   Promise.all([Loaders.CacheTexture('images/2_no_clouds_4k.jpg'),
   // Loaders.CacheTexture('images/elev_bump_4k.jpg'),
-  Loaders.CacheTexture('images/water_4k.png'), Loaders.CacheTexture('images/skybox.jpg'), Loaders.CacheTexture('images/hemisphere.png'), Loaders.CacheTexture('images/beacon.png'), Loaders.CacheTexture('images/earthbump.png'),
+  Loaders.CacheTexture('images/water_4k.png'), Loaders.CacheTexture('images/skybox.jpg'), Loaders.CacheTexture('images/hemisphere.png'), Loaders.CacheTexture('images/current_location.png'), Loaders.CacheTexture('images/beacon.png'), Loaders.CacheTexture('images/earthbump.png'),
   // Loaders.CacheTexture('images/earth_normal.png'),
   // Loaders.CacheTexture('images/earth_lights_lrg.jpg'),
   // Loaders.CacheTexture('images/World-satellite map.png'),
@@ -81,7 +83,7 @@ define(['./src/Loaders.js', './src/EarthObject.js', './src/BottomSide.js', './sr
       return vector.clone().project(camera);
     };
 
-    var controls = new THREE.TrackballControls(camera, document.getElementById("canvasWrapper"));
+    var controls = new _CustomTrackballControls2.default(camera, document.getElementById("canvasWrapper"));
     controls.noPan = true;
     controls.minDistance = 12;
     controls.maxDistance = 35;
