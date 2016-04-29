@@ -1,4 +1,4 @@
-define(['exports', './Loaders.js', './Tweet.js'], function (exports, _Loaders, _Tweet) {
+define(['exports', './Loaders.js', './Tweet.js', './CategoryColors.js'], function (exports, _Loaders, _Tweet, _CategoryColors) {
   'use strict';
 
   Object.defineProperty(exports, "__esModule", {
@@ -8,6 +8,8 @@ define(['exports', './Loaders.js', './Tweet.js'], function (exports, _Loaders, _
   var Loaders = _interopRequireWildcard(_Loaders);
 
   var _Tweet2 = _interopRequireDefault(_Tweet);
+
+  var CategoryColors = _interopRequireWildcard(_CategoryColors);
 
   function _interopRequireDefault(obj) {
     return obj && obj.__esModule ? obj : {
@@ -85,11 +87,13 @@ define(['exports', './Loaders.js', './Tweet.js'], function (exports, _Loaders, _
   var mouse = new THREE.Vector2();
 
   document.body.addEventListener('mousemove', onMouseMove, false);
+  document.body.addEventListener('click', onClick, false);
 
   var leftSide = document.getElementById("leftSide");
   var rightSide = document.getElementById("rightSide");
   var biggieSmalls = document.getElementById("biggieSmalls");
   var closeButton = document.getElementById("close");
+  var misterWorldWide = document.getElementById("misterWorldWide");
 
   var onCanvas = false;
   function onMouseMove(event) {
@@ -101,6 +105,22 @@ define(['exports', './Loaders.js', './Tweet.js'], function (exports, _Loaders, _
 
     mouse.x = event.clientX / window.innerWidth * 2 - 1;
     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+    misterWorldWide.style.right = window.innerWidth - event.clientX + "px";
+    misterWorldWide.style.bottom = window.innerHeight - event.clientY + 30 + "px";
+  }
+
+  var lastClick = 0;
+  function onClick(event) {
+    if (event.target.id == "earth") {
+      var currentClick = new Date().getTime();
+
+      if (currentClick - lastClick < 250) {
+        earth.doubleClick(event);
+      }
+
+      lastClick = currentClick;
+    }
   }
 
   var EarthObject = function (_THREE$Object3D) {
@@ -176,6 +196,26 @@ define(['exports', './Loaders.js', './Tweet.js'], function (exports, _Loaders, _
       _this.add(_this.outlineMesh);
       _this.outlineMesh.rotation.x = Math.PI / 2;
 
+      _this.neuralMesh = new THREE.Mesh(new THREE.SphereGeometry(10.1, 50, 50), new THREE.MeshBasicMaterial({
+        map: Loaders.Texture('images/neural.png'),
+        opacity: 0.5,
+        transparent: true
+      }));
+      _this.add(_this.neuralMesh);
+      _this.neuralMesh.rotation.x = Math.PI / 2;
+
+      _this.neuralImg = new Image();
+      _this.neuralImg.src = 'images/neural.png';
+      _this.neuralImg.onload = function () {
+        var canvas = document.createElement('canvas');
+        canvas.width = _this.neuralImg.width;
+        canvas.height = _this.neuralImg.height;
+        canvas.getContext('2d').drawImage(_this.neuralImg, 0, 0, _this.neuralImg.width, _this.neuralImg.height);
+        _this.neuralCanvas = canvas;
+      };
+
+      _this.hovering = false;
+
       _this.cloudMesh = new THREE.Mesh(new THREE.SphereGeometry(10.1, 50, 50), new THREE.MeshBasicMaterial({
         map: Loaders.Texture('images/Earth-clouds-1.png'),
         transparent: true
@@ -193,6 +233,7 @@ define(['exports', './Loaders.js', './Tweet.js'], function (exports, _Loaders, _
           if (_this.lastIntersect) {
             _this.lastIntersect.object.parent.parent.onClick();
           }
+          e.preventDefault();
         }
       });
 
@@ -204,12 +245,32 @@ define(['exports', './Loaders.js', './Tweet.js'], function (exports, _Loaders, _
         leftSide.className = "inside";
         rightSide.className = "inside";
         biggieSmalls.className = "inside";
+
+        var tweet = _this.showingInfo;
+        _this.showingInfo = false;
+        if (tweet) {
+
+          var children = tweet.tweetEle.parentNode.childNodes;
+          for (var i in children) {
+            var child = children[i];
+            if (child.classList && child.classList.contains && child.classList.contains("popupDisplay") > 0) {
+              child.overrideOpacity = false;
+            }
+          }
+          tweet.beacon.mesh.material.opacity = 0.5;
+        }
       });
 
       closeButton.addEventListener('click', function () {
         leftSide.className = "inside";
         rightSide.className = "inside";
         biggieSmalls.className = "inside";
+
+        var tweet = _this.showingInfo;
+        _this.showingInfo = false;
+        if (tweet) {
+          tweet.stopHover();
+        }
       });
 
       return _this;
@@ -235,6 +296,32 @@ define(['exports', './Loaders.js', './Tweet.js'], function (exports, _Loaders, _
         this.beacons.push(tweet);
       }
     }, {
+      key: 'doubleClick',
+      value: function doubleClick(event) {
+
+        if (this.globeIntersect) {
+          // camera.position.copy( lol );
+
+          var pt = this.globeIntersect.point.clone();
+
+          // console.log(pt);
+          // console.log(pt.length());
+          // console.log(camera.position.length());
+
+          pt.divideScalar(pt.length());
+          pt.multiplyScalar(camera.position.length());
+
+          // console.log(pt);
+
+          this.goal = pt;
+          this.isGoing = true;
+
+          controls.enabled = false;
+          // controls.locking = true;
+          event.preventDefault();
+        }
+      }
+    }, {
       key: 'update',
       value: function update() {
         // var i = 0;
@@ -247,19 +334,39 @@ define(['exports', './Loaders.js', './Tweet.js'], function (exports, _Loaders, _
         // }
         // console.log("yo")
 
+        if (this.isGoing) {
+          camera.position.lerp(this.goal, 0.1);
+          if (camera.position.distanceTo(this.goal) < 0.1) {
+            this.isGoing = false;
+            controls.enabled = true;
+          }
+        }
+
         if (this.current == "standard") {
           this.globeMesh.visible = true;
           this.globeMeshSatellite.visible = false;
           this.outlineMesh.visible = false;
           this.cloudMesh.visible = true;
+          this.neuralMesh.visible = false;
+        } else if (this.current == "neural") {
+          this.globeMesh.visible = true;
+          this.globeMeshSatellite.visible = false;
+          this.outlineMesh.visible = false;
+          this.cloudMesh.visible = false;
+          this.neuralMesh.visible = true;
         } else {
           this.globeMesh.visible = false;
           this.globeMeshSatellite.visible = true;
           this.outlineMesh.visible = true;
           this.cloudMesh.visible = false;
+          this.neuralMesh.visible = false;
         }
 
         raycaster.setFromCamera(mouse, camera);
+
+        if (this.hovering) {
+          misterWorldWide.style.display = 'none';
+        }
 
         if (onCanvas) {
           // calculate objects intersecting the picking ray
@@ -269,7 +376,12 @@ define(['exports', './Loaders.js', './Tweet.js'], function (exports, _Loaders, _
           }
           mesh.push(this.globeMesh);
 
+          var olVis = this.globeMesh.visible;
+          this.globeMesh.visible = true;
           var intersects = raycaster.intersectObjects(mesh);
+          this.globeMesh.visible = olVis;
+
+          this.globeIntersect = null;
 
           if (intersects[0] && intersects[0].object != this.globeMesh) {
 
@@ -281,14 +393,42 @@ define(['exports', './Loaders.js', './Tweet.js'], function (exports, _Loaders, _
               intersects[0].object.parent.parent.startHover();
             }
             this.lastIntersect = intersects[0];
+
+            misterWorldWide.style.display = 'none';
           } else {
             if (this.lastIntersect) {
               this.lastIntersect.object.parent.parent.stopHover();
             }
             this.lastIntersect = null;
+
+            if (intersects[0] && intersects[0].object == this.globeMesh) {
+              this.globeIntersect = intersects[0];
+            }
+
+            // Mouse if over the globe during neural mode
+            if (!this.showingInfo && this.current == "neural" && intersects[0] && intersects[0].object == this.globeMesh) {
+
+              var point = this.worldToLocal(intersects[0].point.clone());
+              var rho = point.length();
+              var coords = this.pointToLongLat(point.x, point.y, point.z, rho);
+              if (coords.lat < -90) {
+                coords.lat += 360;
+              }
+
+              // Display data about where the user is hovering
+              var pos2D = this.latLongToXY(coords.lat, coords.long, 512, 512);
+              var pixelData = this.neuralCanvas.getContext('2d').getImageData(pos2D.x, pos2D.y, 1, 1).data;
+
+              var category = CategoryColors.getCategoryFromColor(pixelData[0], pixelData[1], pixelData[2]);
+              misterWorldWide.textContent = category;
+              misterWorldWide.style.display = 'inline-block';
+            } else {
+              misterWorldWide.style.display = 'none';
+            }
           }
         }
 
+        // Cloud rotation and opacity
         this.cloudMesh.rotation.y += deltaTime / 10000;
 
         var opacity = camera.position.length() / 15 - 1;
@@ -307,6 +447,25 @@ define(['exports', './Loaders.js', './Tweet.js'], function (exports, _Loaders, _
       key: 'sinTest',
       value: function sinTest() {
         return (Math.sin(new Date().getTime() / 100) + 1) / 2;
+      }
+    }, {
+      key: 'latLongToXY',
+      value: function latLongToXY(latitude, longitude, width, height) {
+        var x = (longitude + 180) / 360 * width;
+        var y = (-latitude + 90) / 180 * height;
+
+        return { x: x, y: y };
+      }
+    }, {
+      key: 'pointToLongLat',
+      value: function pointToLongLat(x, y, z, rho) {
+        var phi = Math.asin(z / rho);
+        var theta = Math.atan2(y, x);
+
+        var lat = phi / (Math.PI / 180);
+        var long = (theta - Math.PI) / (Math.PI / 180) + 180;
+
+        return { lat: lat, long: long };
       }
     }, {
       key: 'latLongAltToPoint',

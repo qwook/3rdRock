@@ -37,13 +37,22 @@
       z-index: 10;
       border-radius: 10px;
       border-top-left-radius: 0px;
-      padding: 10px;
       font-size: 1em;
+      white-space: nowrap;
 
       transition: opacity 0.2s;
 
       transform: translate(-50%, -100%);
       -webkit-transform: translate(-50%, -100%);
+    }
+
+    .popupDisplay img {
+      margin-left:10px;
+    }
+
+    .popupDisplay span {
+      display: inline-block;
+      padding: 10px;
     }
 
     .tweetBlockHolder {
@@ -135,6 +144,31 @@
       display: none;
     }
 
+    #misterWorldWide {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      background: #2a9fd6;
+      color: white;
+      padding: 10px;
+      border-radius: 6px;
+      border-bottom-right-radius: 0;
+    }
+
+    #misterWorldWide:before {
+      content: "";
+      position: absolute;
+      bottom: -20px;
+      right: 0px;
+      border: 0;
+      border-right-width: 10px;
+      border-bottom-width: 20px;
+      border-style: solid;
+      border-color: transparent #2a9fd6;
+      display: block;
+      width: 0;
+    }
+
     @media screen and (max-width: 640px) {
       #biggieSmalls {
         position: absolute;
@@ -186,12 +220,19 @@
       #biggieSmalls.inside #close{
         display: none;
       }
+
+      #misterWorldWide {
+        display: none;
+      }
     }
   </style>
 </head>
 <body>
   <div id="canvasWrapper">
     <canvas width="500" height="500" id="earth"></canvas>
+    <div id="misterWorldWide">
+      Volcanoes
+    </div>
   </div>
 
   <div id="biggieSmalls" class="inside">

@@ -1,11 +1,30 @@
-define(["exports", "./Beacon.js"], function (exports, _Beacon) {
-  "use strict";
+define(['exports', './Beacon.js', './CategoryColors.js'], function (exports, _Beacon, _CategoryColors) {
+  'use strict';
 
   Object.defineProperty(exports, "__esModule", {
     value: true
   });
 
   var _Beacon2 = _interopRequireDefault(_Beacon);
+
+  var CategoryColors = _interopRequireWildcard(_CategoryColors);
+
+  function _interopRequireWildcard(obj) {
+    if (obj && obj.__esModule) {
+      return obj;
+    } else {
+      var newObj = {};
+
+      if (obj != null) {
+        for (var key in obj) {
+          if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key];
+        }
+      }
+
+      newObj.default = obj;
+      return newObj;
+    }
+  }
 
   function _interopRequireDefault(obj) {
     return obj && obj.__esModule ? obj : {
@@ -78,8 +97,17 @@ define(["exports", "./Beacon.js"], function (exports, _Beacon) {
       _this.data = data;
 
       var tweetEle = document.createElement("div");
+
+      var tweetImg = document.createElement("img");
+      tweetImg.src = CategoryColors.categories[data.category].icon;
+      tweetImg.style.height = "32px";
+      tweetEle.appendChild(tweetImg);
+
+      var tweetTitle = document.createElement("span");
+      tweetTitle.textContent = data.title;
+      tweetEle.appendChild(tweetTitle);
+
       tweetEle.className = "popupDisplay tweet";
-      tweetEle.textContent = data.title;
       tweetEle.style.top = "0px";
       tweetEle.style.left = "0px";
       _this.tweetEle = tweetEle;
@@ -125,8 +153,14 @@ define(["exports", "./Beacon.js"], function (exports, _Beacon) {
     }
 
     _createClass(Tweet, [{
-      key: "startHover",
+      key: 'startHover',
       value: function startHover() {
+        if (earth.showingInfo) {
+          return;
+        }
+
+        earth.hovering = true;
+
         var children = this.tweetEle.parentNode.childNodes;
         for (var i in children) {
           var child = children[i];
@@ -141,8 +175,14 @@ define(["exports", "./Beacon.js"], function (exports, _Beacon) {
         this.hovering = true;
       }
     }, {
-      key: "stopHover",
+      key: 'stopHover',
       value: function stopHover() {
+        if (earth.showingInfo) {
+          return;
+        }
+
+        earth.hovering = false;
+
         var children = this.tweetEle.parentNode.childNodes;
         for (var i in children) {
           var child = children[i];
@@ -154,7 +194,7 @@ define(["exports", "./Beacon.js"], function (exports, _Beacon) {
         this.hovering = false;
       }
     }, {
-      key: "onClick",
+      key: 'onClick',
       value: function onClick() {
         leftSide.className = "";
         rightSide.className = "";
@@ -162,6 +202,18 @@ define(["exports", "./Beacon.js"], function (exports, _Beacon) {
         leftSide.scrollTop = 0;
         rightSide.scrollTop = 0;
         biggieSmalls.scrollTop = 0;
+
+        var children = this.tweetEle.parentNode.childNodes;
+        for (var i in children) {
+          var child = children[i];
+          if (child.classList && child.classList.contains && child.classList.contains("popupDisplay") > 0) {
+            child.overrideOpacity = true;
+            child.style.opacity = 0.11;
+          }
+        }
+        this.tweetEle.overrideOpacity = true;
+        this.tweetEle.style.opacity = 1;
+        this.beacon.mesh.material.opacity = 1;
 
         var lol = new THREE.Vector3(0, 0, 0);
         this.localToWorld(lol);
@@ -171,16 +223,17 @@ define(["exports", "./Beacon.js"], function (exports, _Beacon) {
         this.isGoing = true;
         controls.enabled = false;
         controls.locking = true;
+        earth.showingInfo = this;
 
         events.dispatchEvent({ type: 'changeFocus', data: this.data });
       }
     }, {
-      key: "destroy",
+      key: 'destroy',
       value: function destroy() {
         this.tweetEle.parentNode.removeChild(this.tweetEle);
       }
     }, {
-      key: "update",
+      key: 'update',
       value: function update() {
 
         if (this.isGoing) {

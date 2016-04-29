@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title></title>
+</head>
+<body>
+  <style type="text/css">
+  img {
+    position: absolute;
+    width: 1024px;
+    height: 1024px;
+    top: 0;
+    left: 0;
+  }
+  canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    opacity: 0.5;
+  }
+  </style>
+  <img src="images/2_no_clouds_4k.jpg" />
+  <canvas id="neural" width="1024" height="1024"></canvas>
+
+  <script src="//localhost:35729/livereload.js"></script>
+  <script type="text/javascript" src="three.js/build/three.js"></script>
+
+  <script src="convnet.js"></script>
+  <script src="util.js"></script>
+  <script type="text/javascript" data-main="src/neural.js" src="requirejs/require.js"></script>
+</body>
+</html>

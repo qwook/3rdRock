@@ -22,6 +22,8 @@
     "google-images": "^1.0.0",
     "google-search": "0.0.3",
     "hdb": "^0.5.5",
+    "jquery": "^2.2.3",
+    "jsdom": "^8.4.1",
     "keyword-extractor": "0.0.12",
     "primus": "^5.1.0",
     "twitter": "^1.2.5",

@@ -1,17 +1,20 @@
 
 import * as Loaders from './Loaders.js';
 import Tweet from './Tweet.js';
+import * as CategoryColors from './CategoryColors.js';
 
 var raycaster = new THREE.Raycaster();
 
 var mouse = new THREE.Vector2();
 
 document.body.addEventListener( 'mousemove', onMouseMove, false );
+document.body.addEventListener( 'click', onClick, false );
 
 var leftSide = document.getElementById("leftSide");
 var rightSide = document.getElementById("rightSide");
 var biggieSmalls = document.getElementById("biggieSmalls");
 var closeButton = document.getElementById("close");
+var misterWorldWide = document.getElementById("misterWorldWide");
 
 var onCanvas = false;
 function onMouseMove( event ) {
@@ -24,6 +27,22 @@ function onMouseMove( event ) {
   mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
   mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;   
 
+  misterWorldWide.style.right = window.innerWidth-event.clientX + "px";
+  misterWorldWide.style.bottom = window.innerHeight-event.clientY+30 + "px";
+
+}
+
+var lastClick = 0;
+function onClick( event ) {
+  if (event.target.id == "earth") {
+    var currentClick = (new Date()).getTime();
+
+    if (currentClick - lastClick < 250) {
+      earth.doubleClick(event);
+    }
+
+    lastClick = currentClick;
+  }
 }
 
 
@@ -116,6 +135,30 @@ export default class EarthObject extends THREE.Object3D {
 
 
 
+    this.neuralMesh = new THREE.Mesh(
+      new THREE.SphereGeometry(10.1, 50, 50),
+      new THREE.MeshBasicMaterial({
+        map: Loaders.Texture('images/neural.png'),
+        opacity: 0.5,
+        transparent: true
+      })
+    );
+    this.add(this.neuralMesh);
+    this.neuralMesh.rotation.x = Math.PI/2;
+
+    this.neuralImg = new Image();
+    this.neuralImg.src = 'images/neural.png';
+    this.neuralImg.onload = () => {
+      var canvas = document.createElement('canvas');
+      canvas.width = this.neuralImg.width;
+      canvas.height = this.neuralImg.height;
+      canvas.getContext('2d').drawImage(this.neuralImg, 0, 0, this.neuralImg.width, this.neuralImg.height);
+      this.neuralCanvas = canvas;
+    };
+
+    this.hovering = false;
+
+
     this.cloudMesh = new THREE.Mesh(
 
       new THREE.SphereGeometry(10.1, 50, 50),
@@ -138,10 +181,11 @@ export default class EarthObject extends THREE.Object3D {
         if (this.lastIntersect) {
           this.lastIntersect.object.parent.parent.onClick();
         }
+        e.preventDefault();
       }
     });
 
-    controls.addEventListener('change', function() {
+    controls.addEventListener('change', () => {
       if (controls.locking) {
         return;
       }
@@ -149,12 +193,33 @@ export default class EarthObject extends THREE.Object3D {
       leftSide.className = "inside";
       rightSide.className = "inside";
       biggieSmalls.className = "inside";
+
+      var tweet = this.showingInfo;
+      this.showingInfo = false;
+      if (tweet) {
+
+        var children = tweet.tweetEle.parentNode.childNodes;
+        for (var i in children) {
+          var child = children[i];
+          if (child.classList && child.classList.contains && child.classList.contains("popupDisplay") > 0) {
+            child.overrideOpacity = false;
+          }
+        }
+        tweet.beacon.mesh.material.opacity = 0.5;
+
+      }
     });
 
-    closeButton.addEventListener('click', function() {
+    closeButton.addEventListener('click', () => {
       leftSide.className = "inside";
       rightSide.className = "inside";
       biggieSmalls.className = "inside";
+
+      var tweet = this.showingInfo;
+      this.showingInfo = false;
+      if (tweet) {
+        tweet.stopHover();
+      }
     });
 
   }
@@ -177,6 +242,31 @@ export default class EarthObject extends THREE.Object3D {
     this.beacons.push(tweet);
   }
 
+  doubleClick(event) {
+
+    if (this.globeIntersect) {
+        // camera.position.copy( lol );
+
+        var pt = this.globeIntersect.point.clone()
+
+        // console.log(pt);
+        // console.log(pt.length());
+        // console.log(camera.position.length());
+
+        pt.divideScalar(pt.length());
+        pt.multiplyScalar(camera.position.length());
+
+        // console.log(pt);
+
+        this.goal = pt;
+        this.isGoing = true;
+
+        controls.enabled = false;
+        // controls.locking = true;
+        event.preventDefault();
+    }
+  }
+
   update() {
     // var i = 0;
     // for (var coord of this.positions) {
@@ -188,19 +278,40 @@ export default class EarthObject extends THREE.Object3D {
     // }
     // console.log("yo")
 
+
+    if (this.isGoing) {
+      camera.position.lerp(this.goal, 0.1);
+      if ( camera.position.distanceTo(this.goal) < 0.1 ) {
+        this.isGoing = false;
+        controls.enabled = true;
+      }
+    }
+
     if (this.current == "standard") {
       this.globeMesh.visible = true;
       this.globeMeshSatellite.visible = false;
       this.outlineMesh.visible = false;
       this.cloudMesh.visible = true;
+      this.neuralMesh.visible = false;
+    } else if (this.current == "neural") {
+      this.globeMesh.visible = true;
+      this.globeMeshSatellite.visible = false;
+      this.outlineMesh.visible = false;
+      this.cloudMesh.visible = false;
+      this.neuralMesh.visible = true;
     } else {
       this.globeMesh.visible = false;
       this.globeMeshSatellite.visible = true;
       this.outlineMesh.visible = true;
       this.cloudMesh.visible = false;
+      this.neuralMesh.visible = false;
     }
 
     raycaster.setFromCamera( mouse, camera ); 
+
+    if (this.hovering) {
+      misterWorldWide.style.display = 'none';
+    }
 
     if (onCanvas) {
       // calculate objects intersecting the picking ray
@@ -210,7 +321,12 @@ export default class EarthObject extends THREE.Object3D {
       }
       mesh.push(this.globeMesh);
 
+      var olVis = this.globeMesh.visible;
+      this.globeMesh.visible = true;
       var intersects = raycaster.intersectObjects( mesh );
+      this.globeMesh.visible = olVis;
+
+      this.globeIntersect = null;
 
       if (intersects[0] && intersects[0].object != this.globeMesh) {
 
@@ -223,14 +339,43 @@ export default class EarthObject extends THREE.Object3D {
         }
         this.lastIntersect = intersects[0];
 
+        misterWorldWide.style.display = 'none';
+
       } else {
         if (this.lastIntersect) {
           this.lastIntersect.object.parent.parent.stopHover();
         }
         this.lastIntersect = null;
+
+        if (intersects[0] && intersects[0].object == this.globeMesh) {
+          this.globeIntersect = intersects[0];
+        }
+
+        // Mouse if over the globe during neural mode
+        if (!this.showingInfo && this.current == "neural" && intersects[0] && intersects[0].object == this.globeMesh) {
+
+          var point = this.worldToLocal(intersects[0].point.clone());
+          var rho = point.length();
+          var coords = this.pointToLongLat(point.x, point.y, point.z, rho);
+          if (coords.lat < -90) {
+            coords.lat += 360;
+          }
+
+          // Display data about where the user is hovering
+          var pos2D = this.latLongToXY(coords.lat, coords.long, 512, 512);
+          var pixelData = this.neuralCanvas.getContext('2d').getImageData(pos2D.x, pos2D.y, 1, 1).data;
+
+          var category = CategoryColors.getCategoryFromColor(pixelData[0], pixelData[1], pixelData[2]);
+          misterWorldWide.textContent = category;
+          misterWorldWide.style.display = 'inline-block';
+
+        } else {
+          misterWorldWide.style.display = 'none';
+        }
       }
     }
 
+    // Cloud rotation and opacity
     this.cloudMesh.rotation.y += deltaTime/10000;
 
     var opacity = camera.position.length() / 15 - 1;
@@ -248,6 +393,23 @@ export default class EarthObject extends THREE.Object3D {
 
   sinTest() {
     return (Math.sin((new Date()).getTime()/100)+1)/2;
+  }
+
+  latLongToXY(latitude, longitude, width, height) {
+    var x = (longitude+180)/360*width;
+    var y = (-latitude+90)/180*height;
+
+    return {x: x, y: y};
+  }
+
+  pointToLongLat(x, y, z, rho) {
+    var phi = Math.asin(z / rho);
+    var theta = Math.atan2(y, x);
+
+    var lat = phi / (Math.PI/180);
+    var long = (theta - Math.PI) / (Math.PI/180) + 180;
+
+    return {lat: lat, long: long};
   }
 
   latLongAltToPoint(lat, long, rho) {
