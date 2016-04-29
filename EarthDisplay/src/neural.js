@@ -129,7 +129,7 @@ Promise.all([
   var neuralLabels = [];
   var neuralDataToCompare = []; // clone of neuralData
 
-  var scale = 2;
+  var scale = 20;
 
   // Load in data
   var i = 0;
