@@ -31,14 +31,14 @@ class Tips extends React.Component {
             } else if (this.props.name == "Volcanoes") {
               return <div>
                 <h2>Volcanoes</h2>
-                <h3>If a lava flow is headed toward you:</h3>
+                <h5>If a lava flow is headed toward you:</h5>
                   <p>Leave the area immediately. If you are warned to evacuate because an eruption is imminent, evacuate.</p>
                   <p>If you can drive rather than walk, use your vehicle to evacuate. When driving keep doors and windows closed, drive across the path of danger if you can or away from the danger if you can not, and watch for unusual hazards in the road.</p>
-                <h3>If you are indoors</h3>
+                <h5>If you are indoors</h5>
                   <p>Close all windows, doors, and fireplace or woodstove dampers.</p>
                   <p>Turn off all fans and heating and air conditioning systems.</p>
                   <p>Bring pets and livestock into closed shelters.</p>
-                <h3>If you are outdoors</h3>
+                <h5>If you are outdoors</h5>
                   <p>Seek shelter indoors.</p>
                   <p>If caught in a rockfall, roll into a ball to protect your head.</p>
                   <p>If near a stream or river, be aware of rising water and possible mudflows in low-lying areas. Move up-slope as quickly as possible.</p>
@@ -63,7 +63,7 @@ class Tips extends React.Component {
             } else if (this.props.name == "Drought") {
               return <div>
                 <h2>Drought</h2>
-                  <h3>Indoors</h3>
+                  <h5>Indoors</h5>
                     <p>Use washing machines for full loads only.</p>
                     <p>Run the dishwasher only when full.</p>
                     <p>When washing dishes by hand, don’t let the water run. Fill one basin with wash water and the other with rinse water.</p>
@@ -72,7 +72,7 @@ class Tips extends React.Component {
                     <p>Install low-flow shower heads.</p>
                     <p>Take a five minute shower instead of a 10 minute one.</p>
                     <p>Turn your bathroom faucet off when brushing your teeth or shaving.</p>
-                  <h3>Outdoors</h3>
+                  <h5>Outdoors</h5>
                     <p>Water early in the morning or later in the evening when temperatures are cooler.</p>
                     <p>Adjust your sprinklers to ensure only your yard is being watered, not your house, sidewalk or street.</p>
                     <p>Put a layer of mulch around trees and plants to reduce evaporation and keep the soil cool.</p>
@@ -142,6 +142,27 @@ class Tips extends React.Component {
               return <div>
                 <h2>Water Colors</h2>
                   <p>Avoid adding pollutants to ocean</p>
+              </div>
+            } else if (this.props.name == "Floods") {
+              return <div>
+                <h2>Floods</h2>
+                  <p>Avoid building in high-risk flood plain areas to minimize your exposure.</p>
+                  <p>Elevate your furnace, water heater and other utilities so that they are less likely to be affected in a flood.</p>
+                  <p>Consider installing “check valves” to prevent water from backing up into your house during a flood.</p>
+                  <p>Seal your basement walls with waterproof material to help protect your home.</p>
+                  <p>Pay attention to local news and information sources when the weather is a potential issue.</p>
+                  <p>Be extremely careful when walking through water that’s flowing. You can use a stick to check the ground as you walk.</p>
+                  <p>Don’t drive your car in a flooded area. You’re at risk of being swept away. Get out of the car and climb to higher ground.</p>
+              </div>
+            } else if (this.props.name == "Manmade") {
+              return <div>
+                <h2>Manmade</h2>
+                  <p>“Like music and art, love of nature is a common language that can transcend political or social boundaries.” ― Jimmy Carter.</p>
+              </div>
+            } else if (this.props.name == "None") {
+              return <div>
+                <h2>None</h2>
+                  <p>No specific disasters reported here.</p>
               </div>
             }
 
