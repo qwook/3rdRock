@@ -197,10 +197,10 @@ for (var y = 0; y < 10000; y++) {
     var coords = [event.longitude, event.latitude];
 
     var realPos2D = latLongToXY(coords[1], coords[0], width, height);
-    for (var r = 0; r < 3; r++) {
+    for (var r = 0; r < 5; r++) {
       var pos2D = {
-        x: realPos2D.x + (Math.random()-0.5)*(width/100),
-        y: realPos2D.y + (Math.random()-0.5)*(height/100)
+        x: realPos2D.x + (Math.random()-0.5)*(width/50),
+        y: realPos2D.y + (Math.random()-0.5)*(height/50)
       }
       // drawCircle(pos2D.x, pos2D.y, 5, categories[event.category].color);
 
