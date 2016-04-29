@@ -374,6 +374,16 @@ define(['exports', './Loaders.js', './Tweet.js', './CurrentLocation.js', './Cate
           this.neuralMesh.visible = false;
         }
 
+        if (this.current == "neural") {
+          for (var beacon of this.beacons) {
+            beacon.visible = false;
+          }
+        } else {
+          for (var beacon of this.beacons) {
+            beacon.visible = true;
+          }
+        }
+
         raycaster.setFromCamera(mouse, camera);
 
         if (this.hovering) {
@@ -383,9 +393,13 @@ define(['exports', './Loaders.js', './Tweet.js', './CurrentLocation.js', './Cate
         if (onCanvas) {
           // calculate objects intersecting the picking ray
           var mesh = [];
-          for (var i in this.beacons) {
-            mesh.push(this.beacons[i].beacon.mesh);
+
+          if (this.current != "neural") {
+            for (var i in this.beacons) {
+              mesh.push(this.beacons[i].beacon.mesh);
+            }
           }
+
           mesh.push(this.globeMesh);
 
           if (this.currentLocation) {
