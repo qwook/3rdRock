@@ -8,6 +8,9 @@ var fs = require('fs');
 var spawn = require('child_process').spawn;
 var express = require('express');
 var Primus = require('primus');
+var GoogleSearch = require('google-search');
+var keys = require('./keys.js');
+var googleImages = require('google-images');
 
 var app = express();
 app.use('/', express.static(__dirname + '/public'));
@@ -17,15 +20,21 @@ var primus = new Primus(server, {});
 var excludeArray = ['Alabama','Alaska','Arizona','Arkansas','California','Colorado','Connecticut','Delaware','District of Columbia','Florida','Georgia','Hawaii','Idaho','Illinois','Indiana','Iowa','Kansas','Kentucky','Louisiana','Maine','Maryland','Massachusetts','Michigan','Minnesota','Mississippi','Missouri','Montana','Nebraska','Nevada','New Hampshire','New Jersey','New Mexico','New York','North Carolina','North Dakota','Ohio','Oklahoma','Oregon','Pennsylvania','Rhode Island','South Carolina','South Dakota','Tennessee','Texas','Utah','Vermont','Virginia','Washington','West Virginia','Wisconsin','Wyoming', 'January', 'February', 'March', 'April', 'May','June','July','August','September','October','November','December','2016'];
 
 var client = new Twitter({
-  consumer_key: '***REMOVED***',
-  consumer_secret: '***REMOVED***',
-  access_token_key: '***REMOVED***',
-  access_token_secret: '***REMOVED***'
+  consumer_key: keys.twitter.consumer_key,
+  consumer_secret: keys.twitter.consumer_secret,
+  access_token_key: keys.twitter.access_token_key,
+  access_token_secret: keys.twitter.access_token_secret
+});
+
+var googleImageSearch = googleImages(keys.google.cx, keys.google.key);
+
+var googleSearch = new GoogleSearch({
+  key: keys.google.key,
+  cx: keys.google.cx
 });
 
 var nasaData = {
-  events: [],
-  hanaPoints: []
+  events: []
 };
 
 function fixedEncodeURIComponent (str) {
@@ -35,7 +44,7 @@ function fixedEncodeURIComponent (str) {
 }
 
 // Step 1: Get data from eonet
-setInterval(function() {
+// setInterval(function() {
   new Promise(function(resolve, reject) {
 
     var nasaOptions = {
@@ -71,7 +80,6 @@ setInterval(function() {
       var eventURL;
       var geometry;
 
-      //Calculating geometric points for hanaPoints
       if (event.geometries[0].type == "Point") {
         geometry = event.geometries[0].coordinates.reverse();
       } else {
@@ -97,31 +105,20 @@ setInterval(function() {
         link: eventURL,
         geometries: event.geometries, 
         twitter: [],
-        watson: [],
-        alchemy: []
+        watson: []
       }
-      for (var i=0; i<30; i++) {
-        var randomGeometry = []
-        geometry.forEach(function(coordinate) {
-          randomGeometry.push(coordinate +10*(Math.random()-0.5))
-        });
-        var newHanaPoint = {
-          category: eventCategory,
-          geometries: randomGeometry
-        };
-        nasaData.hanaPoints.push(newHanaPoint);
-      }
+
       nasaData.events.push(newEvent);
       promises.push(getMedia(newEvent))
     })
 
     // map promisses
     Promise.all(promises).then(function() {
-      fs.writeFile('data.json', JSON.stringify(nasaData))
+      fs.writeFile('streamingData.json', JSON.stringify(nasaData))
       primus.write(nasaData);
     })
   });
-}, 60000);
+// }, 60000);
 
 //Media
 function getMedia(event) {
@@ -158,16 +155,18 @@ function getMedia(event) {
   }).then(function(twitterString) {
     return getWatsonData(event, twitterString);
   }).then(function() {
-    return getAlchemyData(event);
-  }).then(function() {
     return getWeatherData(event);
+  }).then(function() {
+    return getGoogleData(event)
+  }).then(function() {
+    return getGoogleImages(event)
   });
 }
 
 function getWatsonData(event, twitterString) {
   return new Promise(function(resolve, reject) {
     var urlString = fixedEncodeURIComponent(twitterString);
-    var command = spawn('curl', ['-u', "***REMOVED***", "https://gateway.watsonplatform.net/tone-analyzer-beta/api/v3/tone?version=2016-02-11&text="+urlString]);
+    var command = spawn('curl', ['-u', keys.watsonText.key, "https://gateway.watsonplatform.net/tone-analyzer-beta/api/v3/tone?version=2016-02-11&text="+urlString]);
     var temp = '';
     command.stdout.on('data', (data) => {
       temp += data.toString()
@@ -178,39 +177,6 @@ function getWatsonData(event, twitterString) {
       resolve();
     });
   });
-}
-
-function getAlchemyData(event) {
-  return new Promise(function(resolve, reject) {
-    var string = event.title;
-    string = string.replace(',','')
-    excludeArray.forEach(function(excludeElement) {
-      string = string.toLowerCase().replace(excludeElement.toLowerCase(),'')
-    })
-    var extractedString = keyword_extractor.extract(string, {language:"english",remove_digits: true,return_changed_case:true,remove_duplicates: false});
-    extractedString = extractedString.join("^")
-    
-    var alchemyOptions = {
-      host: 'access.alchemyapi.com',
-      path: "/calls/data/GetNews?apikey=***REMOVED***&return=enriched.url.url,enriched.url.title&start=1460851200&end=1461538800&q.enriched.url.title=A["+extractedString+"]+&count=5&outputMode=json"
-      //CHANGE COUNT=1 TO COUNT=5 LATER
-    };
-    http.request(alchemyOptions, function(response) {
-
-      var data;
-      var str = "";
-
-      response.on('data', function (chunk) {
-        str += chunk.toString();
-      });
-
-      response.on('end', function () {
-        data = JSON.parse(str)
-        event.alchemy.push(data)
-        resolve();
-      });
-    }).end();
-  })
 }
 
 function getWeatherData(event) {
@@ -226,7 +192,7 @@ function getWeatherData(event) {
       host: 'twcservice.mybluemix.net',
       port: '443',
       path: '/api/weather/v2/observations/current?units=m&geocode='+geo+'&language=en-US',
-      auth: '***REMOVED***'
+      auth: keys.watsonWeather.key
     }
     https.request(weatherOptions, function(response) {
       var data;
@@ -242,5 +208,59 @@ function getWeatherData(event) {
         resolve();
       });
     }).end();
+  })
+}
+
+function getGoogleData(event) {
+  //send
+  return new Promise(function(resolve,reject) {
+    var searchUrl = googleSearch._generateUrl({
+      q: event.title,
+      start: 1,
+      num: 10 // Number of search results to return between 1 and 10, inclusive  
+    }, function(error, response) {
+
+    });
+
+    var splitUrl = searchUrl.href.split('.com')
+    splitUrl[0] = splitUrl[0].split('https://').pop() + '.com'
+
+    var googleOptions = {
+      host: splitUrl[0],
+      path: splitUrl[1]
+    };
+
+    https.request(googleOptions, function(response) {
+
+      var str = "";
+
+      response.on('data', function (chunk) {
+        str += chunk.toString();
+      });
+
+      response.on('end', function () {
+        data = JSON.parse(str)
+        try {
+          if (data.queries.request[0].cx) {
+            data.queries.request[0].cx = "**REMOVED**"
+          }
+          if (data.queries.nextpage[0].cx) { 
+            data.queries.nextpage[0].cx = "**REMOVED**"
+          }
+        } catch (e) {}
+        event.google = data
+        resolve();
+      });
+    }).end();
+  })
+}
+
+function getGoogleImages(event) {
+  return new Promise(function(resolve,reject) {
+    googleImageSearch.search(event.title)
+      .then(function (images) {
+        event.images = images;
+        resolve();
+    });
   })
 }
