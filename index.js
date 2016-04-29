@@ -1,3 +1,4 @@
+//dependencies
 var http = require('http');
 var https = require('https');
 var Promise = require("bluebird");
@@ -12,6 +13,7 @@ var GoogleSearch = require('google-search');
 var keys = require('./keys.js');
 var googleImages = require('google-images');
 
+//Primus Init
 var app = express();
 app.use('/', express.static(__dirname + '/public'));
 var server = http.createServer(app);
@@ -19,6 +21,7 @@ server.listen(3000);
 var primus = new Primus(server, {});
 var excludeArray = ['Alabama','Alaska','Arizona','Arkansas','California','Colorado','Connecticut','Delaware','District of Columbia','Florida','Georgia','Hawaii','Idaho','Illinois','Indiana','Iowa','Kansas','Kentucky','Louisiana','Maine','Maryland','Massachusetts','Michigan','Minnesota','Mississippi','Missouri','Montana','Nebraska','Nevada','New Hampshire','New Jersey','New Mexico','New York','North Carolina','North Dakota','Ohio','Oklahoma','Oregon','Pennsylvania','Rhode Island','South Carolina','South Dakota','Tennessee','Texas','Utah','Vermont','Virginia','Washington','West Virginia','Wisconsin','Wyoming', 'January', 'February', 'March', 'April', 'May','June','July','August','September','October','November','December','2016'];
 
+//API Keys Auth.
 var client = new Twitter({
   consumer_key: keys.twitter.consumer_key,
   consumer_secret: keys.twitter.consumer_secret,
@@ -43,7 +46,7 @@ function fixedEncodeURIComponent (str) {
   });
 }
 
-// Step 1: Get data from eonet
+// Step 1: Get data from EONET
 // setInterval(function() {
   new Promise(function(resolve, reject) {
 
@@ -80,25 +83,28 @@ function fixedEncodeURIComponent (str) {
       var eventURL;
       var geometry;
 
+      //Long/Latt need to be reversed
       if (event.geometries[0].type == "Point") {
         geometry = event.geometries[0].coordinates.reverse();
       } else {
         geometry = event.geometries[0].coordinates[0][0].reverse();
       }
 
-      //Assigning Categories
+      //Declaring Event Categories
       if (typeof event.categories[0] != "undefined") {
         eventCategory = event.categories[0].title;
       } else {
         eventCategory = 'none'
       }
 
+      //Event URL
       if (typeof event.sources[0] != "undefined") {
         eventURL = event.sources[0].url;
       } else {
         eventURL = 'none'
       }
 
+      //Event Object Template
       var newEvent = {
         title: event.title,
         category: eventCategory,
@@ -108,11 +114,14 @@ function fixedEncodeURIComponent (str) {
         watson: []
       }
 
+      //Add Object to Master JSON
       nasaData.events.push(newEvent);
+
+      //Grab more data each event
       promises.push(getMedia(newEvent))
     })
 
-    // map promisses
+    //Map promisses
     Promise.all(promises).then(function() {
       fs.writeFile('streamingData.json', JSON.stringify(nasaData))
       primus.write(nasaData);
@@ -120,10 +129,11 @@ function fixedEncodeURIComponent (str) {
   });
 // }, 60000);
 
-//Media
 function getMedia(event) {
   // Step 1: Get tweets based on the events
   var title = event.title;
+
+  //Remove Unnceccessary States/Cities from event titles
   excludeArray.forEach(function(area) {
     title = title.toLowerCase().replace(area.toLowerCase(),'')
   })
@@ -145,7 +155,10 @@ function getMedia(event) {
           userPicture: specificTweet.user.profile_image_url,
           media: mediaUrl
         }
+        //Create string of all tweets for Watson language
         twitterString += newTweet.text
+
+        //Add twitter data to event object
         event.twitter.push(newTweet);
       })
 
@@ -173,6 +186,7 @@ function getWatsonData(event, twitterString) {
     });
 
     command.on('close', (code) => {
+      //Add watson data to event object
       event.watson.push(JSON.parse(temp));
       resolve();
     });
@@ -212,12 +226,12 @@ function getWeatherData(event) {
 }
 
 function getGoogleData(event) {
-  //send
+
   return new Promise(function(resolve,reject) {
     var searchUrl = googleSearch._generateUrl({
       q: event.title,
       start: 1,
-      num: 10 // Number of search results to return between 1 and 10, inclusive  
+      num: 10 //# of Results
     }, function(error, response) {
 
     });
@@ -240,6 +254,8 @@ function getGoogleData(event) {
 
       response.on('end', function () {
         data = JSON.parse(str)
+
+        //hiding api key
         try {
           if (data.queries.request[0].cx) {
             data.queries.request[0].cx = "**REMOVED**"
