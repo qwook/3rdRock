@@ -7,7 +7,7 @@
 //Iceberg by Juan Pablo Bravo from the Noun Project
 //Earthquake by Daniele Catalanotto from the Noun Project
 
-export var categories = {
+var categories = {
     "Drought": { //
       id: 0,
       color: [255, 0, 0],
@@ -20,8 +20,13 @@ export var categories = {
     },
     "Earthquakes": {
       id: 2,
-      color: [10, 150, 10],
+      color: [120, 150, 10],
       icon: 'icons/images/icons_29.png'
+    },
+    "Flood": { //
+      id: 3,
+      color: [10, 0, 255],
+      icon: 'icons/images/icons_09.png'
     },
     "Floods": { //
       id: 3,
@@ -35,7 +40,7 @@ export var categories = {
     },
     "Manmade": {
       id: 5,
-      color: [0, 0, 0],
+      color: [0, 10, 20],
       icon: 'icons/images/icons_19.png'
     },
     "Sea and Lake Ice": {
@@ -79,7 +84,7 @@ export var categories = {
     }
 }
 
-export var idToCategories = [];
+var idToCategories = [];
 var colorMap = {};
 for (var i in categories) {
   var cat = categories[i];
@@ -87,6 +92,13 @@ for (var i in categories) {
   colorMap['' + cat.color[0] + ',' + cat.color[1] + ',' + cat.color[2]] = i;
 }
 
-export function getCategoryFromColor(r,g,b) {
+function getCategoryFromColor(r,g,b) {
   return colorMap['' + r + ',' + g + ',' + b];
+}
+
+module.exports = {
+  categories: categories,
+  idToCategories: idToCategories,
+  colorMap: colorMap,
+  getCategoryFromColor: getCategoryFromColor
 }

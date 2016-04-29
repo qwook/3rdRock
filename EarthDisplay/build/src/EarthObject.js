@@ -1,4 +1,4 @@
-define(['exports', './Loaders.js', './Tweet.js', './CategoryColors.js'], function (exports, _Loaders, _Tweet, _CategoryColors) {
+define(['exports', './Loaders.js', './Tweet.js', './CurrentLocation.js', './CategoryColors.js'], function (exports, _Loaders, _Tweet, _CurrentLocation, _CategoryColors) {
   'use strict';
 
   Object.defineProperty(exports, "__esModule", {
@@ -8,6 +8,8 @@ define(['exports', './Loaders.js', './Tweet.js', './CategoryColors.js'], functio
   var Loaders = _interopRequireWildcard(_Loaders);
 
   var _Tweet2 = _interopRequireDefault(_Tweet);
+
+  var _CurrentLocation2 = _interopRequireDefault(_CurrentLocation);
 
   var CategoryColors = _interopRequireWildcard(_CategoryColors);
 
@@ -123,6 +125,19 @@ define(['exports', './Loaders.js', './Tweet.js', './CategoryColors.js'], functio
     }
   }
 
+  var lastMouseDown = 0;
+  document.getElementById("earth").addEventListener('mousedown', function () {
+    lastMouseDown = new Date().getTime();
+  });
+
+  document.body.addEventListener('mouseup', function (event) {
+    var currentClick = new Date().getTime();
+
+    if (currentClick - lastMouseDown < 200) {
+      earth.tap(event);
+    }
+  }, false);
+
   var EarthObject = function (_THREE$Object3D) {
     _inherits(EarthObject, _THREE$Object3D);
 
@@ -225,17 +240,19 @@ define(['exports', './Loaders.js', './Tweet.js', './CategoryColors.js'], functio
       _this.cloudMesh.rotation.x = Math.PI / 2;
       _this.beacons = [];
       _this.current = "standard";
+      _this.currentCat = "None";
 
       // todo: destroy these event listeners...
 
-      window.addEventListener('click', function (e) {
-        if (e.target.id == "earth") {
-          if (_this.lastIntersect) {
-            _this.lastIntersect.object.parent.parent.onClick();
-          }
-          e.preventDefault();
-        }
-      });
+      // window.addEventListener( 'click', (e) => {
+      //   if (e.target.id == "earth") {
+      //     if (this.lastIntersect) {
+      //       this.lastIntersect.object.parent.parent.onClick();
+      //     }
+
+      //     e.preventDefault();
+      //   }
+      // });
 
       controls.addEventListener('change', function () {
         if (controls.locking) {
@@ -273,6 +290,16 @@ define(['exports', './Loaders.js', './Tweet.js', './CategoryColors.js'], functio
         }
       });
 
+      navigator.geolocation.getCurrentPosition(function (geo) {
+        var currentLocation = new _CurrentLocation2.default({ lat: geo.coords.latitude, long: geo.coords.longitude });
+
+        currentLocation.position.copy(_this.latLongAltToPoint(geo.coords.latitude, geo.coords.longitude, 10));
+        _this.add(currentLocation);
+        console.log(geo.coords);
+
+        _this.currentLocation = currentLocation;
+      });
+
       return _this;
     }
 
@@ -294,6 +321,30 @@ define(['exports', './Loaders.js', './Tweet.js', './CategoryColors.js'], functio
         this.add(tweet);
 
         this.beacons.push(tweet);
+      }
+    }, {
+      key: 'tap',
+      value: function tap(event) {
+
+        if (event.target.id == "earth") {
+          if (this.lastIntersect) {
+            this.lastIntersect.object.parent.parent.onClick();
+            controls.forceOut();
+          }
+        }
+
+        if (this.globeIntersect) {
+          console.log(this.current);
+          if (this.current == "neural") {
+            // leftSide.className = "";
+            rightSide.className = "";
+            biggieSmalls.className = "";
+            // leftSide.scrollTop = 0;
+            rightSide.scrollTop = 0;
+            biggieSmalls.scrollTop = 0;
+            events.dispatchEvent({ type: 'changeFocus', data: { twitter: null, currentLocation: this.currentCat, current: false } });
+          }
+        }
       }
     }, {
       key: 'doubleClick',
@@ -320,6 +371,14 @@ define(['exports', './Loaders.js', './Tweet.js', './CategoryColors.js'], functio
           // controls.locking = true;
           event.preventDefault();
         }
+      }
+    }, {
+      key: 'categoryFromLatLong',
+      value: function categoryFromLatLong(lat, long) {
+        var pos2D = this.latLongToXY(lat, long, 1026, 1026);
+        var pixelData = this.neuralCanvas.getContext('2d').getImageData(Math.floor(pos2D.x), Math.floor(pos2D.y), 1, 1).data;
+
+        return CategoryColors.getCategoryFromColor(pixelData[0], pixelData[1], pixelData[2]);
       }
     }, {
       key: 'update',
@@ -362,6 +421,16 @@ define(['exports', './Loaders.js', './Tweet.js', './CategoryColors.js'], functio
           this.neuralMesh.visible = false;
         }
 
+        if (this.current == "neural") {
+          for (var beacon of this.beacons) {
+            beacon.visible = false;
+          }
+        } else {
+          for (var beacon of this.beacons) {
+            beacon.visible = true;
+          }
+        }
+
         raycaster.setFromCamera(mouse, camera);
 
         if (this.hovering) {
@@ -371,10 +440,18 @@ define(['exports', './Loaders.js', './Tweet.js', './CategoryColors.js'], functio
         if (onCanvas) {
           // calculate objects intersecting the picking ray
           var mesh = [];
-          for (var i in this.beacons) {
-            mesh.push(this.beacons[i].beacon.mesh);
+
+          if (this.current != "neural") {
+            for (var i in this.beacons) {
+              mesh.push(this.beacons[i].beacon.mesh);
+            }
           }
+
           mesh.push(this.globeMesh);
+
+          if (this.currentLocation) {
+            mesh.push(this.currentLocation.beacon.mesh);
+          }
 
           var olVis = this.globeMesh.visible;
           this.globeMesh.visible = true;
@@ -416,12 +493,13 @@ define(['exports', './Loaders.js', './Tweet.js', './CategoryColors.js'], functio
               }
 
               // Display data about where the user is hovering
-              var pos2D = this.latLongToXY(coords.lat, coords.long, 512, 512);
+              var pos2D = this.latLongToXY(coords.lat, coords.long, 1026, 1026);
               var pixelData = this.neuralCanvas.getContext('2d').getImageData(pos2D.x, pos2D.y, 1, 1).data;
 
               var category = CategoryColors.getCategoryFromColor(pixelData[0], pixelData[1], pixelData[2]);
               misterWorldWide.textContent = category;
               misterWorldWide.style.display = 'inline-block';
+              this.currentCat = category;
             } else {
               misterWorldWide.style.display = 'none';
             }

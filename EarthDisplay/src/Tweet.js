@@ -149,6 +149,11 @@ export default class Tweet extends THREE.Object3D {
 
   update() {
 
+    if (!this.visible) {
+      this.tweetEle.style.display = 'none';
+      return;
+    }
+
     if (this.isGoing) {
       camera.position.lerp(this.goal, 0.1);
       if ( camera.position.distanceTo(this.goal) < 0.1 ) {
@@ -162,9 +167,7 @@ export default class Tweet extends THREE.Object3D {
 
 
     var pos3D = this.localToWorld(new THREE.Vector3(0,0,0));
-
-    // pos3D.z += 2;
-
+    
     var pos = calc3Dto2D(pos3D);
     // console.log(pos);
     this.tweetEle.style.left = Math.floor((pos.x+1)/2*window.innerWidth) + 'px';
