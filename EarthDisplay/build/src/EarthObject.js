@@ -125,6 +125,19 @@ define(['exports', './Loaders.js', './Tweet.js', './CurrentLocation.js', './Cate
     }
   }
 
+  var lastMouseDown = 0;
+  document.getElementById("earth").addEventListener('mousedown', function () {
+    lastMouseDown = new Date().getTime();
+  });
+
+  document.body.addEventListener('mouseup', function (event) {
+    var currentClick = new Date().getTime();
+
+    if (currentClick - lastMouseDown < 200) {
+      earth.tap(event);
+    }
+  }, false);
+
   var EarthObject = function (_THREE$Object3D) {
     _inherits(EarthObject, _THREE$Object3D);
 
@@ -227,17 +240,19 @@ define(['exports', './Loaders.js', './Tweet.js', './CurrentLocation.js', './Cate
       _this.cloudMesh.rotation.x = Math.PI / 2;
       _this.beacons = [];
       _this.current = "standard";
+      _this.currentCat = "None";
 
       // todo: destroy these event listeners...
 
-      window.addEventListener('click', function (e) {
-        if (e.target.id == "earth") {
-          if (_this.lastIntersect) {
-            _this.lastIntersect.object.parent.parent.onClick();
-          }
-          e.preventDefault();
-        }
-      });
+      // window.addEventListener( 'click', (e) => {
+      //   if (e.target.id == "earth") {
+      //     if (this.lastIntersect) {
+      //       this.lastIntersect.object.parent.parent.onClick();
+      //     }
+
+      //     e.preventDefault();
+      //   }
+      // });
 
       controls.addEventListener('change', function () {
         if (controls.locking) {
@@ -276,7 +291,7 @@ define(['exports', './Loaders.js', './Tweet.js', './CurrentLocation.js', './Cate
       });
 
       navigator.geolocation.getCurrentPosition(function (geo) {
-        var currentLocation = new _CurrentLocation2.default();
+        var currentLocation = new _CurrentLocation2.default({ lat: geo.coords.latitude, long: geo.coords.longitude });
 
         currentLocation.position.copy(_this.latLongAltToPoint(geo.coords.latitude, geo.coords.longitude, 10));
         _this.add(currentLocation);
@@ -308,6 +323,30 @@ define(['exports', './Loaders.js', './Tweet.js', './CurrentLocation.js', './Cate
         this.beacons.push(tweet);
       }
     }, {
+      key: 'tap',
+      value: function tap(event) {
+
+        if (event.target.id == "earth") {
+          if (this.lastIntersect) {
+            this.lastIntersect.object.parent.parent.onClick();
+            controls.forceOut();
+          }
+        }
+
+        if (this.globeIntersect) {
+          console.log(this.current);
+          if (this.current == "neural") {
+            // leftSide.className = "";
+            rightSide.className = "";
+            biggieSmalls.className = "";
+            // leftSide.scrollTop = 0;
+            rightSide.scrollTop = 0;
+            biggieSmalls.scrollTop = 0;
+            events.dispatchEvent({ type: 'changeFocus', data: { twitter: null, currentLocation: this.currentCat, current: false } });
+          }
+        }
+      }
+    }, {
       key: 'doubleClick',
       value: function doubleClick(event) {
 
@@ -332,6 +371,14 @@ define(['exports', './Loaders.js', './Tweet.js', './CurrentLocation.js', './Cate
           // controls.locking = true;
           event.preventDefault();
         }
+      }
+    }, {
+      key: 'categoryFromLatLong',
+      value: function categoryFromLatLong(lat, long) {
+        var pos2D = this.latLongToXY(lat, long, 1026, 1026);
+        var pixelData = this.neuralCanvas.getContext('2d').getImageData(Math.floor(pos2D.x), Math.floor(pos2D.y), 1, 1).data;
+
+        return CategoryColors.getCategoryFromColor(pixelData[0], pixelData[1], pixelData[2]);
       }
     }, {
       key: 'update',
@@ -452,6 +499,7 @@ define(['exports', './Loaders.js', './Tweet.js', './CurrentLocation.js', './Cate
               var category = CategoryColors.getCategoryFromColor(pixelData[0], pixelData[1], pixelData[2]);
               misterWorldWide.textContent = category;
               misterWorldWide.style.display = 'inline-block';
+              this.currentCat = category;
             } else {
               misterWorldWide.style.display = 'none';
             }

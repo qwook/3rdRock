@@ -8,6 +8,8 @@ export default class CurrentLocation extends THREE.Object3D {
   constructor(data) {
     super();
 
+    this.data = data;
+
     var currLocationEle = document.createElement("div");
 
     var currLocationTitle = document.createElement("span");
@@ -24,7 +26,7 @@ export default class CurrentLocation extends THREE.Object3D {
     this.currLocationEle.addEventListener('click', (e) => {
       this.onClick();
     });
-    
+
     var beacon = new Beacon();
     this.add(beacon);
     beacon.rotation.x = -Math.PI/2;
@@ -52,7 +54,9 @@ export default class CurrentLocation extends THREE.Object3D {
     rightSide.scrollTop = 0;
     biggieSmalls.scrollTop = 0;
 
-    events.dispatchEvent({type: 'changeFocus', data: {twitter: null, currentLocation: 'volcanoes'}});
+    var cat = earth.categoryFromLatLong(this.data.lat, this.data.long);
+
+    events.dispatchEvent({type: 'changeFocus', data: {twitter: null, currentLocation: cat, current: true}});
   }
 
   startHover() {

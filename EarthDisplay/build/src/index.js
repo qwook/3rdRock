@@ -1,4 +1,4 @@
-define(['./src/Loaders.js', './src/EarthObject.js', './src/BottomSide.js', './src/RightSide.js', './src/LeftSide.js', './src/ImageLoader_Overwrite.js'], function (_Loaders, _EarthObject, _BottomSide, _RightSide, _LeftSide) {
+define(['./src/Loaders.js', './src/EarthObject.js', './src/BottomSide.js', './src/RightSide.js', './src/LeftSide.js', './src/CustomTrackballControls.js', './src/ImageLoader_Overwrite.js'], function (_Loaders, _EarthObject, _BottomSide, _RightSide, _LeftSide, _CustomTrackballControls) {
   'use strict';
 
   var Loaders = _interopRequireWildcard(_Loaders);
@@ -10,6 +10,8 @@ define(['./src/Loaders.js', './src/EarthObject.js', './src/BottomSide.js', './sr
   var _RightSide2 = _interopRequireDefault(_RightSide);
 
   var _LeftSide2 = _interopRequireDefault(_LeftSide);
+
+  var _CustomTrackballControls2 = _interopRequireDefault(_CustomTrackballControls);
 
   function _interopRequireDefault(obj) {
     return obj && obj.__esModule ? obj : {
@@ -81,7 +83,7 @@ define(['./src/Loaders.js', './src/EarthObject.js', './src/BottomSide.js', './sr
       return vector.clone().project(camera);
     };
 
-    var controls = new THREE.TrackballControls(camera, document.getElementById("canvasWrapper"));
+    var controls = new _CustomTrackballControls2.default(camera, document.getElementById("canvasWrapper"));
     controls.noPan = true;
     controls.minDistance = 12;
     controls.maxDistance = 35;

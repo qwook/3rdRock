@@ -1,4 +1,6 @@
 
+import Tips from './Tips.js';
+
 class RightSide extends React.Component {
     constructor(props) {
         super(props);
@@ -105,6 +107,14 @@ class RightSide extends React.Component {
             </div>
           } else {
             return <div>
+              {(()=>{
+                if (this.state.current) {
+                  return <div><h4>Current Location</h4><p>Using neural networking, we detected the most likely natural event to happen near you. Here are some tips to prepare for such an event.</p><hr /></div>
+                } else {
+                  return <br />
+                }
+              })()}
+              <Tips name={this.state.currentLocation} />
             </div>
           }
         })()}
