@@ -25,6 +25,10 @@ var categories = {
       id: 2,
       color: [10, 150, 10]
     },
+    "Flood": {
+      id: 3,
+      color: [10, 0, 255]
+    },
     "Floods": {
       id: 3,
       color: [10, 0, 255]
@@ -106,7 +110,8 @@ var trainer = new convnetjs.SGDTrainer(neuralNet, {
     neuralNet.fromJSON(data);
   }
 
-  var data = JSON.parse(fs.readFileSync('public/dataForHenry.json', 'utf8'));
+  // var data = JSON.parse(fs.readFileSync('public/dataForHenry.json', 'utf8'));
+  var data = JSON.parse(fs.readFileSync('public/events.json', 'utf8'));
 
 // process.on('SIGINT', function() {
   if (process.argv[2] == "save") {
@@ -123,7 +128,8 @@ var trainer = new convnetjs.SGDTrainer(neuralNet, {
       height: height
     });
 
-    var netx = new convnetjs.Vol(1,1,data.events.length);
+    // var netx = new convnetjs.Vol(1,1,data.events.length);
+    var netx = new convnetjs.Vol(1,1,idToCategories.length);
     for (var x = 0; x < width; x++) {
       for (var y = 0; y < height; y++) {
         var idx = (width * y + x) << 2;
@@ -177,21 +183,24 @@ for (var y = 0; y < 10000; y++) {
 
   // Load in data
   var i = 0;
-  for (var event of data.events) {
+  // for (var event of data.events) {
+  for (var event of data) {
     var coords;
 
-    if (event.geometries[0].type == "Point") {
+    // if (event.geometries[0].type == "Point") {
 
-      coords = event.geometries[0].coordinates;
-    } else {
-      coords = event.geometries[0].coordinates[0][0];
-    }
+    //   coords = event.geometries[0].coordinates;
+    // } else {
+    //   coords = event.geometries[0].coordinates[0][0];
+    // }
+
+    var coords = [event.longitude, event.latitude];
 
     var realPos2D = latLongToXY(coords[1], coords[0], width, height);
-    for (var r = 0; r < 5; r++) {
+    for (var r = 0; r < 3; r++) {
       var pos2D = {
-        x: realPos2D.x + (Math.random()-0.5)*(width/10),
-        y: realPos2D.y + (Math.random()-0.5)*(height/10)
+        x: realPos2D.x + (Math.random()-0.5)*(width/100),
+        y: realPos2D.y + (Math.random()-0.5)*(height/100)
       }
       // drawCircle(pos2D.x, pos2D.y, 5, categories[event.category].color);
 
@@ -232,7 +241,7 @@ for (var y = 0; y < 10000; y++) {
 
   // });
 
-  var neuralVolume = new convnetjs.Vol(1,1,neuralData.length);
+  var neuralVolume = new convnetjs.Vol(1,1,idToCategories.length);
 
   // incrementally train
   for(var iters = 0; iters < iterations; iters++) { // run this 500 times

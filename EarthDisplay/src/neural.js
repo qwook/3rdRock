@@ -5,7 +5,7 @@ import * as Loaders from './src/Loaders.js';
 
 
 Promise.all([
-  Loaders.CacheJSON('dataForHenry.json')
+  Loaders.CacheJSON('events.json')
 ]).then(function() {
 
   var categories = {
@@ -20,6 +20,10 @@ Promise.all([
     "Earthquakes": {
       id: 2,
       color: 'rgb(10, 150, 10)'
+    },
+    "Flood": {
+      id: 3,
+      color: 'rgb(10, 0, 255)'
     },
     "Floods": {
       id: 3,
@@ -129,29 +133,37 @@ Promise.all([
 
   // Load in data
   var i = 0;
-  var data = Loaders.getJSON('dataForHenry.json');
-  for (var event of data.events) {
-    var coords;
+  var data = Loaders.getJSON('events.json');
+  for (var event of data) {
+    // var coords;
 
-    if (event.geometries[0].type == "Point") {
+    // if (event.geometries[0].type == "Point") {
 
-      coords = event.geometries[0].coordinates;
-    } else {
-      coords = event.geometries[0].coordinates[0][0];
-    }
+    //   coords = event.geometries[0].coordinates;
+    // } else {
+    //   coords = event.geometries[0].coordinates[0][0];
+    // }
+
+    var coords = [event.longitude, event.latitude];
 
     var realPos2D = latLongToXY(coords[1], coords[0], width, height);
-    for (var r = 0; r < 5; r++) {
-      var pos2D = {
-        x: realPos2D.x + (Math.random()-0.5)*(width/10),
-        y: realPos2D.y + (Math.random()-0.5)*(height/10)
-      }
-      drawCircle(pos2D.x, pos2D.y, 5, categories[event.category].color);
+    // for (var r = 0; r < 5; r++) {
+    //   var pos2D = {
+    //     x: realPos2D.x + (Math.random()-0.5)*(width/10),
+    //     y: realPos2D.y + (Math.random()-0.5)*(height/10)
+    //   }
+    //   drawCircle(pos2D.x, pos2D.y, 5, categories[event.category].color);
 
-      neuralData.push([pos2D.x/width*6 - 0.5, pos2D.y/height*6 - 0.5]);
-      neuralDataToCompare.push(neuralData[neuralData.length-1]);
-      neuralLabels.push(categories[event.category].id); 
-    }
+    //   neuralData.push([pos2D.x/width*6 - 0.5, pos2D.y/height*6 - 0.5]);
+    //   neuralDataToCompare.push(neuralData[neuralData.length-1]);
+    //   neuralLabels.push(categories[event.category].id); 
+    // }
+
+      drawCircle(realPos2D.x, realPos2D.y, 5, categories[event.category].color);
+
+    neuralData.push([realPos2D.x/width*6 - 0.5, realPos2D.y/height*6 - 0.5]);
+    neuralDataToCompare.push(neuralData[neuralData.length-1]);
+    neuralLabels.push(categories[event.category].id); 
     i++;
   }
 
