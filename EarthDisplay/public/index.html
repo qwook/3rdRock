@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title></title>
+  <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, minimal-ui' name='viewport' />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+
+
+  <!-- Bootstrap -->
+
+  <link rel="stylesheet" type="text/css" href="bootstrap.css">
+  <!-- <link rel="stylesheet" type="text/css" href="bootstrap/dist/css/bootstrap.css"> -->
+  <!-- <link rel="stylesheet" type="text/css" href="bootstrap/dist/css/bootstrap-theme.css"> -->
+
+  <!--  -->
+  <style type="text/css">
+    body, html {
+      overflow: hidden;
+      width: 100%;
+      height: 100%;
+    }
+
+    #canvasWrapper {
+      position: relative;
+      display: inline-block;
+      overflow: hidden;
+    }
+
+    .popunderDisplay, .popupDisplay {
+      font-family: Helvetica;
+      color: white;
+      box-shadow: 0px 0px 5px rgba(0,0,0,1);
+      background: rgba(0,0,0,1);
+      /*border: 1px solid white;*/
+      position: absolute;
+      display: block;
+      z-index: 10;
+      border-radius: 10px;
+      border-top-left-radius: 0px;
+      padding: 10px;
+      font-size: 1em;
+
+      transition: opacity 0.2s;
+
+      transform: translate(-50%, -100%);
+      -webkit-transform: translate(-50%, -100%);
+    }
+
+    .tweetBlockHolder {
+      position: relative;
+    }
+
+    .popupDisplay:hover {
+      background: white;
+      color: black;
+      z-index: 100;
+      cursor: pointer;
+    }
+
+    .popunderDisplay.tweetBlock {
+      bottom: 0;
+      left: 0;
+      transition: opacity 0.5s, bottom 0.5s, left 0.5s;
+      display: none;
+      opacity: 0;
+      pointer-events : none;
+      font-size: 0.8em;
+    }
+
+
+    /*.popupDisplay:hover .tweetBlock {*/
+    /*}*/
+
+    html, body {
+      margin: 0;
+      padding: 0;
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+    }
+
+    #leftSide {
+      display: block;
+      position: absolute;
+      background-color: #060606;
+      top: 0;
+      bottom: 0;
+      width: 30%;
+      left: 0%;
+
+      z-index: 500;
+
+      transition: left 0.5s;
+
+      opacity: 0.9;
+      overflow-y: scroll;
+    }
+
+    #leftSide.inside {
+      left: -30%;
+    }
+
+    #rightSide {
+      display: block;
+      position: absolute;
+      background-color: #060606;
+      top: 0;
+      bottom: 0;
+      width: 30%;
+      right: 0%;
+
+      z-index: 500;
+
+      transition: right 0.5s;
+
+      opacity: 0.9;
+      overflow-y: scroll;
+    }
+
+    #rightSide.inside {
+      right: -30%;
+    }
+
+    #bottomSide {
+      /*text-align: center;*/
+      position: absolute;
+      bottom: 10px;
+      left: 0;
+      right: 0;
+    }
+
+    #close {
+      display: none;
+    }
+
+    @media screen and (max-width: 640px) {
+      #biggieSmalls {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0.8;
+        background-color: #060606;
+        z-index: 500;
+        transition: top 0.5s;
+        overflow-y: scroll;
+      }
+
+      #biggieSmalls.inside {
+        top: -100%;
+      }
+
+      #biggieSmalls #leftSide {
+        position: relative;
+        top: auto;
+        left: auto;
+        right: auto;
+        bottom: auto;
+        width: 100%;
+        background: none;
+        opacity: 1;
+      }
+
+      #biggieSmalls #rightSide {
+        position: relative;
+        top: auto;
+        left: auto;
+        right: auto;
+        bottom: auto;
+        width: 100%;
+        background: none;
+        opacity: 1;
+      }
+
+      #close {
+        position: fixed;
+        display: inline-block;
+        top: 10px;
+        right: 10px;
+        z-index: 501;
+      }
+
+      #biggieSmalls.inside #close{
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="canvasWrapper">
+    <canvas width="500" height="500" id="earth"></canvas>
+  </div>
+
+  <div id="biggieSmalls" class="inside">
+    <div class="btn btn-danger" id="close">
+      <span class="glyphicon glyphicon-remove"></span>
+    </div>
+
+    <div id="leftSide" class="inside">
+    </div>
+
+    <div id="rightSide" class="inside">
+    </div>
+  </div>
+
+  <!-- lol -->
+  <div id="bottomSide">
+  </div>
+
+  <script type="text/javascript">
+    window.global = window;
+  </script>
+
+  <script src="//localhost:35729/livereload.js"></script>
+
+  <!-- Bootstrap -->
+
+  <script type="text/javascript" src="bootstrap/dist/js/bootstrap.js"></script>
+
+  <!--  -->
+
+  <script type="text/javascript" src="react.js"></script>
+  <script type="text/javascript" src="react-dom.js"></script>
+  <script type="text/javascript" src="bluebird/js/browser/bluebird.js"></script>
+  <script type="text/javascript" src="three.js/build/three.js"></script>
+  <script type="text/javascript" src="jquery/dist/jquery.js"></script>
+  <script type="text/javascript" src="autolink/autolink-min.js"></script>
+
+  <!-- Shaders -->
+  <script src="three.js/examples/js/shaders/BleachBypassShader.js"></script>
+  <script src="three.js/examples/js/shaders/ColorCorrectionShader.js"></script>
+  <script src="three.js/examples/js/shaders/CopyShader.js"></script>
+  <script src="three.js/examples/js/shaders/FXAAShader.js"></script>
+
+  <script src="three.js/examples/js/postprocessing/EffectComposer.js"></script>
+  <script src="three.js/examples/js/postprocessing/RenderPass.js"></script>
+  <script src="three.js/examples/js/postprocessing/ShaderPass.js"></script>
+  <script src="three.js/examples/js/postprocessing/MaskPass.js"></script>
+
+
+  <script type="text/javascript" src="three.js/examples/js/renderers/Projector.js"></script>
+  <script type="text/javascript" src="three.js/examples/js/controls/TrackballControls.js"></script>
+  <script type="text/javascript" data-main="src/index.js" src="requirejs/require.js"></script>
+</body>
+</html>
