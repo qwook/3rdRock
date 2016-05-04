@@ -8,8 +8,8 @@
 
   <!-- Bootstrap -->
 
+  <link rel="stylesheet" type="text/css" href="bootstrap/dist/css/bootstrap.css">
   <link rel="stylesheet" type="text/css" href="bootstrap.css">
-  <!-- <link rel="stylesheet" type="text/css" href="bootstrap/dist/css/bootstrap.css"> -->
   <!-- <link rel="stylesheet" type="text/css" href="bootstrap/dist/css/bootstrap-theme.css"> -->
 
   <!--  -->
@@ -247,6 +247,16 @@
     #loading.done {
       display: none;
     }
+
+    #info-button {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+    }
+
+    #info-button a {
+      text-decoration: none;
+    }
   </style>
 </head>
 <body>
@@ -256,6 +266,7 @@
       Volcanoes
     </div>
   </div>
+  <div id="info-button"><a href="#" class="glyphicon glyphicon glyphicon-info-sign"></a></div>
 
   <div id="biggieSmalls" class="inside">
     <div class="btn btn-danger" id="close">

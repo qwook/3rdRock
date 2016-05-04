@@ -169,6 +169,22 @@ define(['./src/Loaders.js', './src/EarthObject.js', './src/BottomSide.js', './sr
     global.lastTime = global.currentTime;
     global.deltaTime = 0;
 
+    var leftSide = document.getElementById("leftSide");
+    var rightSide = document.getElementById("rightSide");
+    var biggieSmalls = document.getElementById("biggieSmalls");
+    var infoButton = document.getElementById('info-button');
+    infoButton.addEventListener('click', function (e) {
+      e.preventDefault();
+
+      // leftSide.className = "";
+      rightSide.className = "";
+      biggieSmalls.className = "";
+      // leftSide.scrollTop = 0;
+      rightSide.scrollTop = 0;
+      biggieSmalls.scrollTop = 0;
+      events.dispatchEvent({ type: 'changeFocus', data: { twitter: null, currentLocation: "Info", current: false } });
+    });
+
     // Rendering Every Frame
     var render = function () {
       requestAnimationFrame(render);

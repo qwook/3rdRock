@@ -96,7 +96,25 @@ class RightSide extends React.Component {
               <hr />
               {
                 this.getGoogle().map((post)=>
-                  <div key={post.link} className="panel panel-default"><div className="panel-body"><h6><a href={post.link}><span dangerouslySetInnerHTML={{__html: post.htmlTitle}} /></a></h6><p><span dangerouslySetInnerHTML={{__html: post.htmlSnippet}} /></p></div></div>
+                  <div key={post.link} className="panel panel-default">
+                    <div className="panel-body">
+                      <h6>
+                        <a href={post.link}>
+                          <span dangerouslySetInnerHTML={{__html: post.htmlTitle}} />
+                        </a>
+                      </h6>
+
+                      <p>
+                        <span dangerouslySetInnerHTML={{__html: post.htmlSnippet}} />
+                      </p>
+                      
+                      {(() => {
+                        if (post.pagemap && post.pagemap.cse_thumbnail && post.pagemap.cse_thumbnail[0] &&  post.pagemap.cse_thumbnail[0].src) {
+                          return <div><hr/><img src={post.pagemap.cse_thumbnail[0].src} style={{"maxWidth": "100%"}} /></div>;
+                        }
+                      })()}
+                    </div>
+                  </div>
                 )
               }
               {(() => {

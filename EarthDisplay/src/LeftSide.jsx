@@ -18,8 +18,38 @@ class LeftSide extends React.Component {
     }
 
     getNasaImage() {
-      console.log(this);
-      console.log(this.state);
+
+      try {
+        if (this.state.twitter) {
+          for (var tweet of this.state.twitter) {
+            if (tweet.media) {
+              return tweet.media;
+            }
+          }
+        }
+      } catch(e) {}
+
+      try {
+        if (this.state.google.items) {
+          for (var post of this.state.google.items) {
+            if (post.pagemap && post.pagemap.cse_thumbnail && post.pagemap.cse_thumbnail[0] &&  post.pagemap.cse_thumbnail[0].src) {
+              return post.pagemap.cse_thumbnail[0].src;
+            }
+          }
+        }
+      } catch(e) {}
+
+      try {
+        if (this.google) {
+          for (var post of this.google) {
+            if (post.pagemap && post.pagemap.cse_thumbnail && post.pagemap.cse_thumbnail[0] &&  post.pagemap.cse_thumbnail[0].src) {
+              return post.pagemap.cse_thumbnail[0].src;
+            }
+          }
+        }
+      } catch(e) {}
+
+
       if (!this.state.coords) {
         return "";
       }
@@ -90,69 +120,83 @@ class LeftSide extends React.Component {
       }
     }
 
+    onCurrentLocation() {
+      if (this.state.twitter == null && this.state.currentLocation) {
+        return true;
+      }
+
+      return false;
+    }
+
     render() {
         return <div className="container-fluid">
-          <img src="/images/based.png" width="50%" style={{maxWidth: "100px", marginTop:"20px", marginBottom:"20px"}}/>
-          <p>{this.state.title}</p>
-          <img src={this.getNasaImage()} width="100%" />
-          <hr/>
-
-          <h5>Weather</h5>
           {(()=> {
-            var weather = this.getWeather();
-            console.log(weather);
-            if (weather) {
+            if (!this.onCurrentLocation()) {
               return <div>
-                <h6>{weather.text}</h6>
-                <strong>Wind Direction:</strong>&nbsp;{weather.wind}<br/>
-                <strong>Temperature:</strong>&nbsp;{weather.temp}
-              </div>
-            } else {
-              return <p>N/A</p>
+                <img src="/images/based.png" width="50%" style={{maxWidth: "100px", marginTop:"20px", marginBottom:"20px"}}/>
+                <p>{this.state.title}</p>
+                <img src={this.getNasaImage()} width="100%" />
+                <hr/>
+
+                <h5>Weather</h5>
+                {(()=> {
+                  var weather = this.getWeather();
+                  console.log(weather);
+                  if (weather) {
+                    return <div>
+                      <h6>{weather.text}</h6>
+                      <strong>Wind Direction:</strong>&nbsp;{weather.wind}<br/>
+                      <strong>Temperature:</strong>&nbsp;{weather.temp}
+                    </div>
+                  } else {
+                    return <p>N/A</p>
+                  }
+                })()}
+                
+                <hr/>
+
+                <h5>Mood <small>(Powered by Watson)</small></h5>
+                {(()=>{
+                  var watson = this.getWatson();
+                  if (watson) {
+                    return <div>
+                      <div className="progress">
+                        <div className="progress-bar progress-bar-danger" role="progressbar" aria-valuenow={Math.floor(watson.anger*100)} aria-valuemin="0" aria-valuemax="100" style={{minWidth: "2em", width: watson.anger*100 + "%"}}>
+                          Anger {Math.floor(watson.anger*100)}%
+                        </div>
+                      </div>
+                      <div className="progress">
+                        <div className="progress-bar progress-bar-info" role="progressbar" aria-valuenow={Math.floor(watson.disgust*100)} aria-valuemin="0" aria-valuemax="100" style={{minWidth: "2em", width: watson.disgust*100 + "%"}}>
+                          Disgust {Math.floor(watson.disgust*100)}%
+                        </div>
+                      </div>
+                      <div className="progress">
+                        <div className="progress-bar progress-bar-warning" role="progressbar" aria-valuenow={Math.floor(watson.fear*100)} aria-valuemin="0" aria-valuemax="100" style={{minWidth: "2em", width: watson.fear*100 + "%"}}>
+                          Fear {Math.floor(watson.fear*100)}%
+                        </div>
+                      </div>
+                      <div className="progress">
+                        <div className="progress-bar progress-bar-success" role="progressbar" aria-valuenow={Math.floor(watson.joy*100)} aria-valuemin="0" aria-valuemax="100" style={{minWidth: "2em", width: watson.joy*100 + "%"}}>
+                          Joy {Math.floor(watson.joy*100)}%
+                        </div>
+                      </div>
+                      <div className="progress">
+                        <div className="progress-bar" role="progressbar" aria-valuenow={Math.floor(watson.sadness*100)} aria-valuemin="0" aria-valuemax="100" style={{minWidth: "2em", width: watson.sadness*100 + "%"}}>
+                          Sadness {Math.floor(watson.sadness*100)}%
+                        </div>
+                      </div>
+                    </div>
+                  } else {
+                    return <p>N/A</p>
+                  }
+                })()}
+
+                <hr/>
+                <p>Made by Aris Koumis and Henry Tran.</p>
+              </div>;
             }
           })()}
-          
-          <hr/>
-
-          <h5>Mood <small>(Powered by Watson)</small></h5>
-          {(()=>{
-            var watson = this.getWatson();
-            if (watson) {
-              return <div>
-                <div className="progress">
-                  <div className="progress-bar progress-bar-danger" role="progressbar" aria-valuenow={Math.floor(watson.anger*100)} aria-valuemin="0" aria-valuemax="100" style={{minWidth: "2em", width: watson.anger*100 + "%"}}>
-                    Anger {Math.floor(watson.anger*100)}%
-                  </div>
-                </div>
-                <div className="progress">
-                  <div className="progress-bar progress-bar-info" role="progressbar" aria-valuenow={Math.floor(watson.disgust*100)} aria-valuemin="0" aria-valuemax="100" style={{minWidth: "2em", width: watson.disgust*100 + "%"}}>
-                    Disgust {Math.floor(watson.disgust*100)}%
-                  </div>
-                </div>
-                <div className="progress">
-                  <div className="progress-bar progress-bar-warning" role="progressbar" aria-valuenow={Math.floor(watson.fear*100)} aria-valuemin="0" aria-valuemax="100" style={{minWidth: "2em", width: watson.fear*100 + "%"}}>
-                    Fear {Math.floor(watson.fear*100)}%
-                  </div>
-                </div>
-                <div className="progress">
-                  <div className="progress-bar progress-bar-success" role="progressbar" aria-valuenow={Math.floor(watson.joy*100)} aria-valuemin="0" aria-valuemax="100" style={{minWidth: "2em", width: watson.joy*100 + "%"}}>
-                    Joy {Math.floor(watson.joy*100)}%
-                  </div>
-                </div>
-                <div className="progress">
-                  <div className="progress-bar" role="progressbar" aria-valuenow={Math.floor(watson.sadness*100)} aria-valuemin="0" aria-valuemax="100" style={{minWidth: "2em", width: watson.sadness*100 + "%"}}>
-                    Sadness {Math.floor(watson.sadness*100)}%
-                  </div>
-                </div>
-              </div>
-            } else {
-              return <p>N/A</p>
-            }
-          })()}
-
-          <hr/>
-          <p>Made by Aris Koumis and Henry Tran.</p>
-        </div>;
+      </div>
     }
 }
 
